@@ -1,0 +1,28 @@
+{% extends "layouts/auth.html" %}
+{% from "partials/_macros.html" import field, checkbox_field, csrf, form_alert %}
+{% block title %}{{ 'Donor' if role == 'donor' else 'Recipient' }} registration · HemoLink{% endblock %}
+{% block auth_content %}
+<h1>{{ 'Register as a donor' if role == 'donor' else 'Register to find donors' }}</h1>
+<p class="muted">{{ 'Your phone number is never shown in search. You decide who can see it.' if role == 'donor' else 'You will be able to search donors and post blood requests.' }}</p>
+<form method="post" class="form" data-loading-form data-password-match>
+  {{ csrf() }}
+  {{ form_alert(errors) }}
+  <fieldset class="fieldset">
+    <legend>Your account</legend>
+    {{ field('full_name', 'Full name', form, errors, autocomplete='name', maxlength=100, autofocus=true) }}
+    <div class="field-row">
+      {{ field('email', 'Email address', form, errors, type='email', autocomplete='email', maxlength=254) }}
+      {{ field('phone', 'Phone number', form, errors, type='tel', autocomplete='tel', inputmode='tel', hint='10 to 15 digits. A leading + is fine.') }}
+    </div>
+    <div class="field-row">
+      {{ field('password', 'Password', form, errors, type='password', autocomplete='new-password', hint='At least 8 characters with a letter and a number.') }}
+      {{ field('confirm_password', 'Confirm password', form, errors, type='password', autocomplete='new-password') }}
+    </div>
+  </fieldset>
+  {% if role == 'donor' %}{% include "partials/_donor_fields.html" %}{% endif %}
+  {{ checkbox_field('accept_terms', 'I accept the terms of use and privacy policy', form, errors) }}
+  <p class="hint">Read the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener">terms</a> and <a href="{{ url_for('main.privacy') }}" target="_blank" rel="noopener">privacy policy</a>.</p>
+  <button class="btn btn-primary btn-block" type="submit" data-loading-text="Creating account…">Create account</button>
+</form>
+<p class="auth-links">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+{% endblock %}

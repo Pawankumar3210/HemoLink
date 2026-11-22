@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: CI only needs to read the repository. No secrets are used, so
+# pull requests from forks cannot leak anything.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Flake8
+        run: flake8 app tests scripts run.py
+      - name: Black (formatting check)
+        run: black --check --diff .
+
+  test:
+    name: Tests on MySQL
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          # Throwaway credentials for a database that exists only for this job.
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+          MYSQL_DATABASE: hemolink_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-only-root-password --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      APP_ENV: testing
+      TEST_DATABASE_URL: mysql+pymysql://root:ci-only-root-password@127.0.0.1:3306/hemolink_test?charset=utf8mb4
+      TEST_USE_MIGRATIONS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Record resolved dependency versions
+        run: pip freeze > requirements-resolved.txt
+      - name: Apply migrations to MySQL
+        run: flask --app run db upgrade
+      - name: Check that models and migrations agree
+        run: flask --app run db check
+      - name: Verify the migration can be reversed and re-applied
+        run: |
+          flask --app run db downgrade base
+          flask --app run db upgrade
+      - name: Run tests with coverage
+        run: pytest --cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+      - name: Upload coverage and dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            coverage.xml
+            requirements-resolved.txt
+          if-no-files-found: ignore
+
+  security:
+    name: Dependency audit (informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
+  docker:
+    name: Docker build and smoke test
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a throwaway .env for Compose
+        run: |
+          {
+            echo "APP_ENV=development"
+            echo "SECRET_KEY=$(openssl rand -hex 32)"
+            echo "MYSQL_DATABASE=hemolink"
+            echo "MYSQL_USER=hemolink"
+            echo "MYSQL_PASSWORD=$(openssl rand -hex 16)"
+            echo "MYSQL_ROOT_PASSWORD=$(openssl rand -hex 16)"
+            echo "WEB_PORT=8000"
+            echo "RUN_MIGRATIONS=1"
+          } > .env
+      - name: Build images
+        run: docker compose build
+      - name: Start the stack (application + MySQL)
+        run: docker compose up -d
+      - name: Smoke test the running container
+        run: SMOKE_ATTEMPTS=40 SMOKE_DELAY=3 sh scripts/smoke_test.sh http://localhost:8000
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail=200
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  ci-success:
+    name: CI result
+    if: always()
+    needs: [lint, test, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarise required checks
+        run: |
+          {
+            echo "### CI result"
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Lint and format | ${{ needs.lint.result }} |"
+            echo "| Tests on MySQL | ${{ needs.test.result }} |"
+            echo "| Docker build and smoke test | ${{ needs.docker.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Fail unless every required check passed
+        if: needs.lint.result != 'success' || needs.test.result != 'success' || needs.docker.result != 'success'
+        run: |
+          echo "A required check did not pass. Deployment is blocked."
+          exit 1

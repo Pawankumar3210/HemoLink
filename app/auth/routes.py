@@ -1,0 +1,191 @@
+"""Registration, login, logout and password reset."""
+
+from flask import (
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from flask_login import current_user, login_required, login_user, logout_user
+
+from app.auth import bp
+from app.constants import ROLE_DONOR, ROLE_RECIPIENT
+from app.services import password_reset, users
+from app.services.errors import ServiceError
+from app.services.mailer import delivery_available, get_outbox, smtp_configured
+from app.services.validation import (
+    validate_email,
+    validate_login,
+    validate_password_reset,
+    validate_registration,
+)
+from app.utils.ratelimit import rate_limit
+from app.utils.security import is_safe_redirect_target
+
+INVALID_LOGIN = "Invalid email or password."
+
+
+@bp.route("/login", methods=["GET", "POST"])
+@rate_limit("login-ip", 20, 300)
+@rate_limit("login-email", 5, 300, key="form:email")
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.home"))
+    errors = {}
+    if request.method == "POST":
+        cleaned, errors = validate_login(request.form)
+        if errors:
+            flash(INVALID_LOGIN, "error")
+        else:
+            user, state = users.authenticate(cleaned["email"], cleaned["password"])
+            if state == "ok":
+                login_user(user)
+                session.permanent = True
+                users.record_login(user)
+                target = request.args.get("next") or request.form.get("next")
+                if is_safe_redirect_target(target):
+                    return redirect(target)
+                return redirect(url_for("dashboard.home"))
+            if state == "suspended":
+                flash(
+                    "This account has been suspended. Please contact an administrator.",
+                    "error",
+                )
+            else:
+                flash(INVALID_LOGIN, "error")
+    return (
+        render_template(
+            "auth/login.html",
+            form=request.form,
+            errors={},
+            next_url=request.args.get("next", ""),
+        ),
+        200,
+    )
+
+
+@bp.route("/logout", methods=["POST"])
+@login_required
+def logout():
+    logout_user()
+    flash("You have been signed out.", "success")
+    return redirect(url_for("main.index"))
+
+
+@bp.route("/register")
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.home"))
+    return render_template("auth/register_choice.html")
+
+
+def _register(role):
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.home"))
+    errors = {}
+    if request.method == "POST":
+        cleaned, errors = validate_registration(request.form, role)
+        if not errors:
+            try:
+                user = users.register_user(cleaned, role)
+            except ServiceError as error:
+                errors[error.field or "form"] = error.message
+            else:
+                login_user(user)
+                session.permanent = True
+                users.record_login(user)
+                flash("Welcome to HemoLink! Your account has been created.", "success")
+                return redirect(url_for("dashboard.home"))
+        status = 400
+    else:
+        status = 200
+    return (
+        render_template(
+            "auth/register.html", role=role, form=request.form, errors=errors
+        ),
+        status,
+    )
+
+
+@bp.route("/register/donor", methods=["GET", "POST"])
+@rate_limit("register", 10, 3600)
+def register_donor():
+    return _register(ROLE_DONOR)
+
+
+@bp.route("/register/recipient", methods=["GET", "POST"])
+@rate_limit("register", 10, 3600)
+def register_recipient():
+    return _register(ROLE_RECIPIENT)
+
+
+@bp.route("/forgot-password", methods=["GET", "POST"])
+@rate_limit("forgot", 5, 900)
+def forgot_password():
+    errors = {}
+    available = delivery_available()
+    if request.method == "POST":
+        if not available:
+            flash(
+                "Password reset by email is not available on this deployment. "
+                "Please contact an administrator.",
+                "error",
+            )
+        else:
+            email, error = validate_email(request.form.get("email"))
+            if error:
+                errors["email"] = error
+            else:
+                password_reset.request_reset(email)
+                flash(
+                    "If an account exists for that email, we have sent reset "
+                    "instructions. The link expires soon and works once.",
+                    "success",
+                )
+                return redirect(url_for("auth.login"))
+    return render_template(
+        "auth/forgot_password.html",
+        form=request.form,
+        errors=errors,
+        available=available,
+        dev_console=available and not smtp_configured(),
+    )
+
+
+@bp.route("/reset-password/<token>", methods=["GET", "POST"])
+@rate_limit("reset", 10, 900)
+def reset_password(token):
+    row = password_reset.get_valid_token(token)
+    if row is None:
+        return render_template("auth/reset_password.html", invalid=True, errors={}), 400
+    errors = {}
+    if request.method == "POST":
+        cleaned, errors = validate_password_reset(request.form, row.user.email)
+        if not errors:
+            try:
+                password_reset.reset_password(token, cleaned["password"])
+            except ServiceError as error:
+                errors["form"] = error.message
+            else:
+                flash("Your password has been changed. Please sign in.", "success")
+                return redirect(url_for("auth.login"))
+    return render_template(
+        "auth/reset_password.html",
+        invalid=False,
+        errors=errors,
+        token=token,
+    ), (400 if errors else 200)
+
+
+@bp.route("/dev/outbox")
+def dev_outbox():
+    """Development-only view of emails the console mail backend captured."""
+    config = current_app.config
+    if not config.get("ALLOW_CONSOLE_MAIL") or smtp_configured():
+        abort(404)
+    messages = list(reversed(get_outbox()))
+    return render_template("auth/dev_outbox.html", messages=messages)

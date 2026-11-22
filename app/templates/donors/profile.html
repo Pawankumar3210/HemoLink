@@ -1,0 +1,37 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, empty_state %}
+{% block title %}My donor profile · HemoLink{% endblock %}
+{% block page_title %}My donor profile{% endblock %}
+{% block page_actions %}<a class="btn btn-primary" href="{{ url_for('donors.edit_profile') }}">Edit profile</a>{% endblock %}
+{% block content %}
+{% if profile %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="pd-title">
+    <h2 id="pd-title" class="card-title">Profile details</h2>
+    <div class="profile-summary">{{ blood_badge(profile.blood_group) }}<div><p><strong>{{ current_user.full_name }}</strong></p><p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p></div></div>
+    <dl class="meta-list">
+      <div><dt>Blood group</dt><dd>{{ profile.blood_group }}</dd></div>
+      <div><dt>Age</dt><dd>{{ profile.age }}</dd></div>
+      <div><dt>Gender</dt><dd>{{ profile.gender or 'Not shared' }}</dd></div>
+      <div><dt>Phone</dt><dd>{{ current_user.phone }}</dd></div>
+      <div><dt>Last donation</dt><dd>{{ profile.last_donation_date|fmt_date if profile.last_donation_date else 'Not set' }}</dd></div>
+      <div><dt>Member since</dt><dd>{{ profile.created_at|fmt_date }}</dd></div>
+      <div><dt>Last updated</dt><dd>{{ profile.updated_at|fmt_date }}</dd></div>
+    </dl>
+  </section>
+  <section class="card" aria-labelledby="priv-title">
+    <h2 id="priv-title" class="card-title">What others can see</h2>
+    <dl class="meta-list">
+      <div><dt>Availability</dt><dd>{{ badge(profile.availability_status) }}</dd></div>
+      <div><dt>Appears in search</dt><dd>{{ 'Yes' if profile.visible_in_search else 'No, you are hidden' }}</dd></div>
+      <div><dt>Last donation date shown</dt><dd>{{ 'Yes' if profile.share_last_donation_date else 'No' }}</dd></div>
+      <div><dt>Phone number</dt><dd>Only after you accept a contact request</dd></div>
+      <div><dt>Email address</dt><dd>Never shown to other users</dd></div>
+    </dl>
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('donors.availability') }}">Manage availability</a>
+  </section>
+</div>
+{% else %}
+{{ empty_state('No donor profile yet', 'Add your blood group and location so recipients can find you.', 'droplet', 'Create profile', url_for('donors.edit_profile')) }}
+{% endif %}
+{% endblock %}

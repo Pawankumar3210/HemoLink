@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import icon %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1>Every Drop Counts. Every Connection Matters.</h1>
+      <p class="lead">Connect with voluntary blood donors in your area through a simple, secure, and community-driven platform.</p>
+      <div class="cluster">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('donors.search') }}">Find Blood Donors</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.register_donor') }}">Become a Donor</a>
+      </div>
+      <p class="hero-note">{{ icon('lock', 16) }} A donor's phone number is shown only after that donor accepts your request.</p>
+    </div>
+    <div class="hero-visual">
+      <img src="{{ url_for('static', filename='images/hero.svg') }}" width="480" height="440" alt="A blood drop at the centre of a network of donors and recipients, labelled with blood groups O negative, A positive, B positive and AB positive.">
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" aria-labelledby="live-stats">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="live-stats">On the platform right now</h2>
+      <p>These are live counts from the HemoLink database. A new deployment starts at zero and grows as people join.</p>
+    </div>
+    {% if stats %}
+    <dl class="live-stats">
+      <div><dt>Registered donors</dt><dd>{{ stats.donors }}</dd></div>
+      <div><dt>Open blood requests</dt><dd>{{ stats.open_requests }}</dd></div>
+      <div><dt>Requests marked fulfilled</dt><dd>{{ stats.fulfilled_requests }}</dd></div>
+    </dl>
+    {% else %}
+    <p class="muted">Live counts are temporarily unavailable.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="how-title">How it works</h2>
+      <p>Three steps, with consent at every stage.</p>
+    </div>
+    <ol class="steps">
+      <li>
+        <span class="step-index" aria-hidden="true">1</span>
+        <h3>Register</h3>
+        <p>Create an account and complete your profile. Donors choose whether they appear in search.</p>
+      </li>
+      <li>
+        <span class="step-index" aria-hidden="true">2</span>
+        <h3>Connect</h3>
+        <p>Search for suitable donors or receive contact requests. Donors accept or decline each one.</p>
+      </li>
+      <li>
+        <span class="step-index" aria-hidden="true">3</span>
+        <h3>Make a difference</h3>
+        <p>Communicate and coordinate responsibly, then mark your request as fulfilled.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt" aria-labelledby="groups-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="groups-title">Search by blood group</h2>
+      <p>HemoLink matches the exact blood group you choose. Ask a doctor or the hospital which groups are compatible for a patient.</p>
+    </div>
+    <ul class="group-grid">
+      {% for group in BLOOD_GROUPS %}
+      <li>
+        <a class="group-card" href="{{ url_for('donors.search', blood_group=group) }}">
+          <span class="group-name">{{ group }}</span>
+          <span class="group-cta">Find {{ group }} donors</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="why-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 id="why-title">Why HemoLink</h2>
+    </div>
+    <ul class="feature-grid">
+      <li>{{ icon('search', 24) }}<h3>Easy donor discovery</h3><p>Filter by blood group, name and availability, with results sorted so available donors come first.</p></li>
+      <li>{{ icon('pin', 24) }}<h3>Location-based search</h3><p>Narrow results by state and city. HemoLink never asks for a street address or GPS location.</p></li>
+      <li>{{ icon('lock', 24) }}<h3>Privacy-conscious contact</h3><p>Phone numbers stay hidden until a donor accepts a request, and donors can end access later.</p></li>
+      <li>{{ icon('toggle', 24) }}<h3>Donor availability management</h3><p>Donors set themselves as available, temporarily unavailable or unavailable, and can hide from search.</p></li>
+      <li>{{ icon('users', 24) }}<h3>Centralized coordination</h3><p>Requests, replies and status updates live in one place instead of scattered chats.</p></li>
+      <li>{{ icon('globe', 24) }}<h3>Accessible design</h3><p>Keyboard friendly, readable on phones, with clear labels and visible focus states.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section sdg-band" aria-labelledby="sdg-title">
+  <div class="container sdg-grid">
+    <div>
+      <h2 id="sdg-title">Built for Sustainable Development Goal 3</h2>
+      <p>SDG 3 is about good health and well-being for people of all ages. HemoLink supports that goal by making it easier for voluntary donors and people who need blood to find each other, using digital coordination and respect for consent.</p>
+      <a class="btn btn-secondary" href="{{ url_for('main.sdg3') }}">Read how HemoLink aligns with SDG 3</a>
+    </div>
+    <p class="sdg-note">HemoLink is not a healthcare institution, blood bank or emergency service, and it does not check anyone's medical eligibility.</p>
+  </div>
+</section>
+
+<section class="section cta-band">
+  <div class="container cta-inner">
+    <h2>Ready to help, or to find help?</h2>
+    <div class="cluster">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register_donor') }}">Register as a donor</a>
+      <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.register_recipient') }}">Register to find donors</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

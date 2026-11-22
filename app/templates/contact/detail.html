@@ -1,0 +1,62 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, post_button %}
+{% block title %}Contact request · HemoLink{% endblock %}
+{% block page_title %}Contact request{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('contact.incoming') if as_donor else url_for('contact.tracking') }}">Back to list</a>{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="cd-title">
+    <div class="card-header"><h2 id="cd-title" class="card-title">{{ 'Request from ' ~ contact.recipient.full_name if as_donor else 'Request to ' ~ contact.donor.full_name }}</h2>{{ badge(contact.status) }}</div>
+    <blockquote class="message-box">{{ contact.message }}</blockquote>
+    <dl class="meta-list">
+      <div><dt>Sent</dt><dd>{{ contact.created_at|fmt_datetime }}</dd></div>
+      {% if contact.responded_at %}<div><dt>Answered</dt><dd>{{ contact.responded_at|fmt_datetime }}</dd></div>{% endif %}
+      {% if contact.donor_consent_at %}<div><dt>Consent given</dt><dd>{{ contact.donor_consent_at|fmt_datetime }}</dd></div>{% endif %}
+      {% if contact.recipient_access_revoked_at %}<div><dt>Access ended</dt><dd>{{ contact.recipient_access_revoked_at|fmt_datetime }}</dd></div>{% endif %}
+      {% if contact.blood_request %}
+      <div><dt>Linked blood request</dt><dd>{{ blood_badge(contact.blood_request.blood_group) }} {{ contact.blood_request.units_required }} unit{{ '' if contact.blood_request.units_required == 1 else 's' }}, {{ contact.blood_request.city }}, by {{ contact.blood_request.required_by|fmt_date }}{% if not as_donor %} · <a href="{{ url_for('blood_requests.detail', request_id=contact.blood_request.id) }}">View</a>{% endif %}</dd></div>
+      {% endif %}
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="ca-title">
+    {% if as_donor %}
+      <h2 id="ca-title" class="card-title">Your decision</h2>
+      {% if contact.status == 'pending' %}
+        <p>Accepting lets {{ contact.recipient.full_name }} see your phone number. Declining keeps it private.</p>
+        <div class="cluster">
+          {{ post_button(url_for('contact.accept', contact_id=contact.id), 'Accept and share my number', 'btn btn-primary', 'Share your phone number with ' ~ contact.recipient.full_name ~ '?') }}
+          {{ post_button(url_for('contact.decline', contact_id=contact.id), 'Decline', 'btn btn-secondary') }}
+        </div>
+      {% elif contact.status == 'accepted' and not contact.access_revoked %}
+        <div class="alert alert-success" role="status">{{ icon('check', 18) }}<p>You accepted this request. The recipient can see your phone number.</p></div>
+        <dl class="meta-list"><div><dt>Recipient phone</dt><dd><a href="tel:{{ contact.recipient.phone }}">{{ contact.recipient.phone }}</a></dd></div></dl>
+        {{ post_button(url_for('contact.revoke', contact_id=contact.id), 'End access to my number', 'btn btn-danger', 'End access? The recipient will no longer see your phone number.') }}
+      {% elif contact.status == 'accepted' %}
+        <p class="muted">You ended access. The recipient can no longer see your phone number.</p>
+      {% else %}
+        <p class="muted">This request is {{ contact.status|label|lower }}. Nothing further is needed.</p>
+      {% endif %}
+    {% else %}
+      <h2 id="ca-title" class="card-title">Donor contact details</h2>
+      {% if contact.recipient_can_view_contact %}
+        <div class="alert alert-success" role="status">{{ icon('check', 18) }}<p>{{ contact.donor.full_name }} accepted your request.</p></div>
+        <dl class="meta-list">
+          <div><dt>Name</dt><dd>{{ contact.donor.full_name }}</dd></div>
+          <div><dt>Phone</dt><dd><a href="tel:{{ contact.donor.phone }}">{{ contact.donor.phone }}</a></dd></div>
+        </dl>
+        <p class="hint">Please be respectful, and confirm with the hospital before anyone donates.</p>
+      {% elif contact.status == 'pending' %}
+        <div class="alert alert-info" role="status">{{ icon('clock', 18) }}<p>Waiting for the donor to reply. Their phone number stays hidden until they accept.</p></div>
+        {{ post_button(url_for('contact.withdraw', contact_id=contact.id), 'Withdraw request', 'btn btn-secondary', 'Withdraw this contact request?') }}
+      {% elif contact.status == 'accepted' %}
+        <div class="alert alert-info" role="note">{{ icon('lock', 18) }}<p>The donor has ended access to their contact details.</p></div>
+      {% elif contact.status == 'declined' %}
+        <div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>The donor declined. Their details stay private. You can <a href="{{ url_for('donors.search') }}">search for other donors</a>.</p></div>
+      {% else %}
+        <p class="muted">You withdrew this request.</p>
+      {% endif %}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

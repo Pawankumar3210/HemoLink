@@ -1,0 +1,13 @@
+# Runtime dependencies. Compatible-release ranges: security fixes within a range are
+# picked up automatically, breaking changes are not. CI uploads the exact resolved
+# versions of every run as an artifact (see docs/devops-pipeline.md).
+Flask>=3.1,<3.2
+Flask-SQLAlchemy>=3.1,<3.2
+SQLAlchemy>=2.0,<2.1
+Flask-Migrate>=4.0,<5
+Flask-Login>=0.6.3,<0.7
+Flask-WTF>=1.2,<1.3
+PyMySQL>=1.1,<2
+cryptography>=42
+gunicorn>=22,<24
+python-dotenv>=1.0,<2

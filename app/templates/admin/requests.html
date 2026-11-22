@@ -1,0 +1,63 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import badge, blood_badge, page_nav, empty_state, csrf %}
+{% block title %}Blood requests · HemoLink admin{% endblock %}
+{% block page_title %}Blood requests{% endblock %}
+{% block content %}
+<section class="card" aria-label="Filters">
+  <form method="get" class="filter-bar">
+    <div class="field"><label for="r-status">Status</label><select id="r-status" name="status"><option value="">Any</option>{% for s in ['open', 'fulfilled', 'cancelled', 'rejected'] %}<option value="{{ s }}"{% if filters.status == s %} selected{% endif %}>{{ s|label }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="r-group">Blood group</label><select id="r-group" name="blood_group"><option value="">Any</option>{% for g in BLOOD_GROUPS %}<option value="{{ g }}"{% if filters.blood_group == g %} selected{% endif %}>{{ g }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="r-state">State</label><select id="r-state" name="state"><option value="">Any</option>{% for s in INDIAN_STATES %}<option value="{{ s }}"{% if filters.state == s %} selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="r-city">City</label><input id="r-city" name="city" type="text" maxlength="80" value="{{ filters.city }}"></div>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.requests') }}">Clear</a>
+  </form>
+</section>
+{% if pagination.items %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Blood requests</caption>
+    <thead><tr><th scope="col">Group</th><th scope="col">Units</th><th scope="col">Location</th><th scope="col">Needed by</th><th scope="col">Requester</th><th scope="col">Status</th><th scope="col">Moderate</th></tr></thead>
+    <tbody>
+      {% for r in pagination.items %}
+      <tr>
+        <td data-label="Group">{{ blood_badge(r.blood_group) }}</td>
+        <td data-label="Units">{{ r.units_required }}</td>
+        <td data-label="Location">{{ r.city }}, {{ r.state }}</td>
+        <td data-label="Needed by">{{ r.required_by|fmt_date }}</td>
+        <td data-label="Requester"><a href="{{ url_for('admin.user_detail', user_id=r.requester_id) }}">{{ r.requester.full_name }}</a></td>
+        <td data-label="Status">{{ badge(r.status) }}{% if r.moderation_note %}<br><span class="muted small">{{ r.moderation_note }}</span>{% endif %}</td>
+        <td data-label="Moderate">
+          {% if r.status == 'open' %}
+          <details class="moderate">
+            <summary>Moderate</summary>
+            <form method="post" action="{{ url_for('admin.request_status', request_id=r.id) }}" class="moderate-form">
+              {{ csrf() }}
+              <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+              <label for="reason-{{ r.id }}">Reason (needed to reject)</label>
+              <input id="reason-{{ r.id }}" name="reason" type="text" maxlength="200">
+              <div class="cluster">
+                <button class="btn btn-danger btn-sm" type="submit" name="status" value="rejected" data-confirm="Reject this request? The requester will be notified with your reason.">Reject</button>
+                <button class="btn btn-secondary btn-sm" type="submit" name="status" value="cancelled" data-confirm="Cancel this request on the requester's behalf?">Cancel</button>
+                <button class="btn btn-secondary btn-sm" type="submit" name="status" value="fulfilled">Mark fulfilled</button>
+              </div>
+            </form>
+          </details>
+          {% elif r.status == 'rejected' %}
+          <form method="post" action="{{ url_for('admin.request_status', request_id=r.id) }}" class="inline-form">
+            {{ csrf() }}
+            <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+            <button class="btn btn-secondary btn-sm" type="submit" name="status" value="open" data-confirm="Reopen this request?">Reopen</button>
+          </form>
+          {% else %}<span class="muted">No action</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No requests match', 'Try removing a filter.', 'list') }}
+{% endif %}
+{% endblock %}

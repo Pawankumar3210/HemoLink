@@ -1,0 +1,33 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import csrf, form_alert, checkbox_field, empty_state %}
+{% block title %}Availability · HemoLink{% endblock %}
+{% block page_title %}Availability{% endblock %}
+{% block page_sub %}<p class="muted">Tell recipients whether you can help right now. This is your own choice and is not a medical check.</p>{% endblock %}
+{% block content %}
+{% if profile %}
+<section class="card card-form">
+  <form method="post" class="form" data-loading-form>
+    {{ csrf() }}
+    {{ form_alert(errors) }}
+    <fieldset class="fieldset">
+      <legend>Your availability</legend>
+      <div class="radio-cards">
+        {% for value, text in AVAILABILITY_OPTIONS %}
+        <label class="radio-card">
+          <input type="radio" name="availability_status" value="{{ value }}"{% if profile.availability_status == value %} checked{% endif %} required>
+          <span><strong>{{ text }}</strong>
+            <small>{% if value == 'available' %}Recipients can send you contact requests.{% elif value == 'temporarily_unavailable' %}Use this while you recover or travel. Requests are still possible.{% else %}Recipients cannot send you new contact requests.{% endif %}</small>
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+      {% if errors.get('availability_status') %}<p class="error-text" role="alert">{{ errors['availability_status'] }}</p>{% endif %}
+    </fieldset>
+    {{ checkbox_field('visible_in_search', 'Show me in donor search', {'visible_in_search': 'on' if profile.visible_in_search else ''}, errors, hint='If this is off, you will not appear in any search, even when you are available.') }}
+    <button class="btn btn-primary" type="submit" data-loading-text="Saving…">Save availability</button>
+  </form>
+</section>
+{% else %}
+{{ empty_state('Complete your profile first', 'You need a donor profile before you can set availability.', 'droplet', 'Create profile', url_for('donors.edit_profile')) }}
+{% endif %}
+{% endblock %}

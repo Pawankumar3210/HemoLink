@@ -1,0 +1,32 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import field, select_field, textarea_field, csrf, form_alert %}
+{% block title %}{{ 'Edit' if editing else 'New' }} blood request · HemoLink{% endblock %}
+{% block page_title %}{{ 'Edit blood request' if editing else 'New blood request' }}{% endblock %}
+{% block page_sub %}<p class="muted">Share only what donors need. Please do not include patient names or medical record numbers.</p>{% endblock %}
+{% block content %}
+<section class="card card-form">
+  <form method="post" class="form" data-loading-form>
+    {{ csrf() }}
+    {{ form_alert(errors) }}
+    {% set urgency_form = form if form.get('urgency') else {'urgency': 'normal'} %}
+    <div class="field-row">
+      {{ select_field('blood_group', 'Blood group required', BLOOD_GROUPS, form, errors, placeholder='Select blood group') }}
+      {{ field('units_required', 'Units required', form, errors, type='number', inputmode='numeric', min=1, max=20) }}
+    </div>
+    {{ field('hospital_name', 'Hospital or healthcare facility', form, errors, required=false, maxlength=150) }}
+    <div class="field-row">
+      {{ select_field('state', 'State', INDIAN_STATES, form, errors, placeholder='Select state') }}
+      {{ field('city', 'City', form, errors, maxlength=80) }}
+    </div>
+    <div class="field-row">
+      {{ field('required_by', 'Required by', form, errors, type='date', min=today_iso) }}
+      {{ select_field('urgency', 'Urgency', URGENCY_OPTIONS, urgency_form, errors, placeholder='Select urgency', hint='You choose this yourself. HemoLink does not assess medical urgency.') }}
+    </div>
+    {{ textarea_field('notes', 'Additional notes', form, errors, required=false, hint='For example, ward or visiting hours. Up to 500 characters.') }}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" data-loading-text="Saving…">{{ 'Save changes' if editing else 'Post request' }}</button>
+      <a class="btn btn-ghost" href="{{ url_for('blood_requests.detail', request_id=editing.id) if editing else url_for('blood_requests.index') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

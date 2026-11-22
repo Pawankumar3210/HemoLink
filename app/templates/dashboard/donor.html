@@ -1,0 +1,81 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, stat_card, csrf, empty_state %}
+{% block title %}Donor dashboard · HemoLink{% endblock %}
+{% block page_title %}Hello, {{ current_user.full_name.split()[0] }}{% endblock %}
+{% block page_sub %}<p class="muted">Here is what needs your attention today.</p>{% endblock %}
+{% block content %}
+{% if profile and not profile.visible_in_search %}
+<div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>You are currently hidden from donor search, so recipients cannot find you. <a href="{{ url_for('donors.availability') }}">Change visibility</a>.</p></div>
+{% endif %}
+<div class="stat-grid">
+  {{ stat_card('Pending requests', stats.pending, 'inbox', url_for('contact.incoming')) }}
+  {{ stat_card('Accepted requests', stats.accepted, 'check', url_for('contact.history')) }}
+  {{ stat_card('All requests received', stats.total, 'users', url_for('contact.history')) }}
+  {{ stat_card('Unread notifications', unread_count(), 'bell', url_for('notifications.index')) }}
+</div>
+
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="avail-title">
+    <h2 id="avail-title" class="card-title">Your availability</h2>
+    {% if profile %}
+    <p class="current-status">{{ badge(profile.availability_status) }} {% if profile.visible_in_search %}<span class="muted">Visible in search</span>{% else %}<span class="muted">Hidden from search</span>{% endif %}</p>
+    <form method="post" action="{{ url_for('donors.quick_availability') }}" class="inline-form-row">
+      {{ csrf() }}
+      <label class="sr-only" for="quick-availability">Availability</label>
+      <select id="quick-availability" name="availability_status">
+        {% for value, text in AVAILABILITY_OPTIONS %}<option value="{{ value }}"{% if profile.availability_status == value %} selected{% endif %}>{{ text }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Update</button>
+    </form>
+    <p class="hint">Availability is self-reported and does not check medical eligibility.</p>
+    {% else %}
+    {{ empty_state('Complete your donor profile', 'Add your blood group and location so recipients can find you.', 'droplet', 'Complete profile', url_for('donors.edit_profile')) }}
+    {% endif %}
+  </section>
+
+  <section class="card" aria-labelledby="profile-title">
+    <h2 id="profile-title" class="card-title">Your profile</h2>
+    {% if profile %}
+    <div class="profile-summary">
+      {{ blood_badge(profile.blood_group) }}
+      <div>
+        <p><strong>{{ current_user.full_name }}</strong></p>
+        <p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p>
+        <p class="muted">Last donation: {{ profile.last_donation_date|fmt_date if profile.last_donation_date else 'Not set' }}</p>
+      </div>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('donors.edit_profile') }}">Edit profile</a>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card" aria-labelledby="pending-title">
+  <div class="card-header"><h2 id="pending-title" class="card-title">Contact requests waiting for you</h2><a href="{{ url_for('contact.incoming') }}">View all</a></div>
+  {% if pending %}
+  <ul class="item-list">
+    {% for contact in pending %}
+    <li>
+      <div>
+        <p><strong>{{ contact.recipient.full_name }}</strong> {{ badge(contact.status) }}</p>
+        <p class="muted">{{ contact.message|truncate(110) }}</p>
+      </div>
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('contact.detail', contact_id=contact.id) }}">Review</a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  {{ empty_state('No pending requests', 'When a recipient asks to contact you, it will appear here.', 'inbox') }}
+  {% endif %}
+</section>
+
+<section class="card" aria-labelledby="notes-title">
+  <div class="card-header"><h2 id="notes-title" class="card-title">Recent notifications</h2><a href="{{ url_for('notifications.index') }}">View all</a></div>
+  {% if notifications %}
+  <ul class="item-list">
+    {% for n in notifications %}<li><div><p><strong>{{ n.title }}</strong></p><p class="muted">{{ n.message }}</p></div><time class="muted" datetime="{{ n.created_at.isoformat() }}">{{ n.created_at|fmt_date }}</time></li>{% endfor %}
+  </ul>
+  {% else %}
+  {{ empty_state('No notifications yet', 'Updates about requests will show up here.', 'bell') }}
+  {% endif %}
+</section>
+{% endblock %}

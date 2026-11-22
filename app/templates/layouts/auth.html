@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import logo %}
+{% block body_class %}is-auth{% endblock %}
+{% block shell %}
+<main id="main" class="auth-page">
+  <div class="auth-card">
+    <a class="auth-brand" href="{{ url_for('main.index') }}" aria-label="HemoLink home">{{ logo(36) }}</a>
+    {% include "partials/_flash.html" %}
+    {% block auth_content %}{% endblock %}
+  </div>
+  <p class="auth-foot"><a href="{{ url_for('main.privacy') }}">Privacy</a> <a href="{{ url_for('main.terms') }}">Terms</a></p>
+</main>
+{% endblock %}

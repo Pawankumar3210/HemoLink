@@ -1,0 +1,40 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import badge, blood_badge, post_button %}
+{% block title %}User {{ user.id }} · HemoLink admin{% endblock %}
+{% block page_title %}{{ user.full_name }}{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('admin.users') }}">Back to users</a>{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="ud-title">
+    <h2 id="ud-title" class="card-title">Account</h2>
+    <dl class="meta-list">
+      <div><dt>Role</dt><dd>{{ user.role|label }}</dd></div>
+      <div><dt>Status</dt><dd>{{ badge(user.account_status) }}</dd></div>
+      <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+      <div><dt>Phone</dt><dd>{{ user.phone or 'Not set' }}</dd></div>
+      <div><dt>Joined</dt><dd>{{ user.created_at|fmt_datetime }}</dd></div>
+      <div><dt>Last sign-in</dt><dd>{{ user.last_login_at|fmt_datetime if user.last_login_at else 'Never' }}</dd></div>
+    </dl>
+    {% if user.role != 'admin' and user.account_status != 'deleted' %}
+      {% if user.account_status == 'active' %}
+        {{ post_button(url_for('admin.suspend_user', user_id=user.id), 'Suspend account', 'btn btn-danger', 'Suspend this account? They will be signed out and hidden from search.') }}
+      {% else %}
+        {{ post_button(url_for('admin.reactivate_user', user_id=user.id), 'Reactivate account', 'btn btn-primary', 'Reactivate this account?') }}
+      {% endif %}
+    {% endif %}
+  </section>
+  {% if user.donor_profile %}
+  <section class="card" aria-labelledby="dp-title">
+    <h2 id="dp-title" class="card-title">Donor profile</h2>
+    <dl class="meta-list">
+      <div><dt>Blood group</dt><dd>{{ blood_badge(user.donor_profile.blood_group) }}</dd></div>
+      <div><dt>Location</dt><dd>{{ user.donor_profile.city }}, {{ user.donor_profile.state }}</dd></div>
+      <div><dt>Age</dt><dd>{{ user.donor_profile.age }}</dd></div>
+      <div><dt>Availability</dt><dd>{{ badge(user.donor_profile.availability_status) }}</dd></div>
+      <div><dt>Visible in search</dt><dd>{{ 'Yes' if user.donor_profile.visible_in_search else 'No' }}</dd></div>
+      <div><dt>Last donation</dt><dd>{{ user.donor_profile.last_donation_date|fmt_date if user.donor_profile.last_donation_date else 'Not set' }}</dd></div>
+    </dl>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

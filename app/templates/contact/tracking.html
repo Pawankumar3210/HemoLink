@@ -1,0 +1,12 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import empty_state %}
+{% block title %}Contact tracking · HemoLink{% endblock %}
+{% block page_title %}Contact tracking{% endblock %}
+{% block page_sub %}<p class="muted">Follow each request you sent to a donor.</p>{% endblock %}
+{% block content %}
+{% if pagination.items %}
+  {% with view='recipient' %}{% include "contact/_list.html" %}{% endwith %}
+{% else %}
+  {{ empty_state('You have not contacted any donors', 'Search for donors and send a request to see it tracked here.', 'users', 'Find donors', url_for('donors.search')) }}
+{% endif %}
+{% endblock %}

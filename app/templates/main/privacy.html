@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Privacy policy · HemoLink{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container-narrow">
+  <h1>Privacy policy</h1>
+  <p class="lead">What HemoLink collects, why, who sees it and how long it is kept.</p>
+</div></section>
+<section class="section"><div class="container-narrow prose">
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>All users:</strong> full name, email address, phone number and a hashed password.</li>
+    <li><strong>Donors:</strong> blood group, age, optional gender, state, city, optional last donation date, availability and visibility choices.</li>
+    <li><strong>Recipients:</strong> blood requests (blood group, units, hospital name if given, location, date, urgency, notes) and contact requests.</li>
+    <li><strong>Technical:</strong> a session cookie that keeps you signed in, and server logs that avoid personal details.</li>
+  </ul>
+  <p>We do not collect street addresses, GPS locations, medical records or identity documents.</p>
+  <h2>Who can see what</h2>
+  <ul>
+    <li><strong>Public search results</strong> (signed-in recipients only) show a donor's name, blood group, city, state and availability. The last donation date appears only if the donor chose to share it.</li>
+    <li><strong>Phone numbers</strong> are shown only to the recipient of an accepted contact request, and only until the donor ends access. If a donor accepts, the donor also sees the recipient's phone number for that request.</li>
+    <li><strong>Email addresses</strong> are never shown to other users.</li>
+    <li><strong>Administrators</strong> can view accounts and requests to run and moderate the platform. Their actions are recorded in an audit log.</li>
+  </ul>
+  <h2>Your choices</h2>
+  <ul>
+    <li>Donors can leave search at any time and change availability at any time.</li>
+    <li>You can edit your name and phone number in Account settings.</li>
+    <li>You can delete your account in Account settings.</li>
+  </ul>
+  <h2>Retention after account deletion</h2>
+  <p>When you delete your account, your name, email, phone number and donor profile are removed or replaced with placeholders, your notifications are deleted, open blood requests are cancelled and pending contact requests are closed. Blood requests and contact requests you were part of remain in anonymised form so other users keep a consistent history. Audit log entries keep only numeric identifiers.</p>
+  <h2>Security</h2>
+  <p>Passwords are stored as salted hashes. Forms are protected against cross-site request forgery, input is validated on the server, and sensitive actions are rate limited. No system is perfectly secure, so please use a unique password.</p>
+  <h2>Academic project notice</h2>
+  <p>HemoLink is a student project. Do not use it for real patients without review by qualified professionals.</p>
+</div></section>
+{% endblock %}

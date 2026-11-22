@@ -1,0 +1,15 @@
+{% from "partials/_macros.html" import icon %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-stack container">
+    {% for category, message in messages %}
+      {% set kind = 'error' if category in ['error', 'danger'] else ('success' if category == 'success' else 'info') %}
+      <div class="alert alert-{{ kind }}" role="{{ 'alert' if kind == 'error' else 'status' }}">
+        {{ icon('check' if kind == 'success' else ('alert' if kind == 'error' else 'info'), 18) }}
+        <p>{{ message }}</p>
+        <button type="button" class="alert-close" data-dismiss aria-label="Dismiss message">{{ icon('x', 16) }}</button>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}

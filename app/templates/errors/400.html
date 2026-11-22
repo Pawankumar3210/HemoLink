@@ -1,0 +1,5 @@
+{% extends "errors/_base.html" %}
+{% block title %}Request could not be completed · HemoLink{% endblock %}
+{% block code %}400{% endblock %}
+{% block heading %}We could not complete that request{% endblock %}
+{% block message %}{{ message or "Something about the request was not valid. Go back, check your details and try again." }}{% endblock %}

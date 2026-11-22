@@ -1,0 +1,31 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, page_nav, empty_state %}
+{% block title %}Open blood requests · HemoLink{% endblock %}
+{% block page_title %}Open blood requests{% endblock %}
+{% block page_sub %}<p class="muted">Requests from recipients that are still open. By default we show your blood group and state.</p>{% endblock %}
+{% block content %}
+<section class="card" aria-label="Filters">
+  <form method="get" class="filter-bar">
+    <div class="field"><label for="o-group">Blood group</label>
+      <select id="o-group" name="blood_group"><option value="">Any</option>{% for g in BLOOD_GROUPS %}<option value="{{ g }}"{% if filters.blood_group == g %} selected{% endif %}>{{ g }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="o-state">State</label>
+      <select id="o-state" name="state"><option value="">Any</option>{% for s in INDIAN_STATES %}<option value="{{ s }}"{% if filters.state == s %} selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+    <button class="btn btn-primary" type="submit">Apply</button>
+  </form>
+</section>
+{% if pagination.items %}
+<div class="donor-grid">
+  {% for r in pagination.items %}
+  <article class="donor-card">
+    <header>{{ blood_badge(r.blood_group) }}<div><h3>{{ r.units_required }} unit{{ '' if r.units_required == 1 else 's' }} needed</h3><p class="muted">{{ icon('pin', 14) }} {{ r.city }}, {{ r.state }}</p></div>{{ badge(r.urgency) }}</header>
+    <p class="muted small">Needed by {{ r.required_by|fmt_date }}{% if r.hospital_name %} · {{ r.hospital_name }}{% endif %}</p>
+    <footer><a class="btn btn-secondary btn-sm" href="{{ url_for('blood_requests.detail', request_id=r.id) }}">View details</a></footer>
+  </article>
+  {% endfor %}
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No open requests match', 'Try widening the blood group or state filter.', 'list') }}
+{% endif %}
+<p class="hint">If you want to help, wait for a recipient to send you a contact request. Your phone number is never shared without your approval.</p>
+{% endblock %}

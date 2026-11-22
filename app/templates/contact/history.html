@@ -1,0 +1,12 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import empty_state %}
+{% block title %}Contact history · HemoLink{% endblock %}
+{% block page_title %}Contact request history{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('contact.incoming') }}">Pending requests</a>{% endblock %}
+{% block content %}
+{% if pagination.items %}
+  {% with view='donor' %}{% include "contact/_list.html" %}{% endwith %}
+{% else %}
+  {{ empty_state('No history yet', 'Requests you have accepted, declined or that were withdrawn will be listed here.', 'clock') }}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import field, checkbox_field, csrf, form_alert %}
+{% block title %}Account settings · HemoLink{% endblock %}
+{% block page_title %}Account settings{% endblock %}
+{% block content %}
+{% set profile_errors = errors if active == 'profile' else {} %}
+{% set password_errors = errors if active == 'password' else {} %}
+{% set delete_errors = errors if active == 'delete' else {} %}
+{% set profile_form = form if active == 'profile' else {'full_name': current_user.full_name, 'phone': current_user.phone or ''} %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="details-title">
+    <h2 id="details-title" class="card-title">Your details</h2>
+    <form method="post" action="{{ url_for('dashboard.update_account') }}" class="form" data-loading-form>
+      {{ csrf() }}
+      {{ form_alert(profile_errors) }}
+      {{ field('full_name', 'Full name', profile_form, profile_errors, autocomplete='name', maxlength=100) }}
+      <div class="field"><label for="account-email">Email address</label><input id="account-email" type="email" value="{{ current_user.email }}" disabled aria-describedby="email-note"><p class="hint" id="email-note">Your email is your sign-in name and cannot be changed here.</p></div>
+      {{ field('phone', 'Phone number', profile_form, profile_errors, type='tel', autocomplete='tel', inputmode='tel') }}
+      <button class="btn btn-primary" type="submit" data-loading-text="Saving…">Save changes</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="password-title">
+    <h2 id="password-title" class="card-title">Change password</h2>
+    <form method="post" action="{{ url_for('dashboard.change_password') }}" class="form" data-loading-form data-password-match="new_password">
+      {{ csrf() }}
+      {{ form_alert(password_errors) }}
+      {{ field('current_password', 'Current password', {}, password_errors, type='password', autocomplete='current-password') }}
+      {{ field('new_password', 'New password', {}, password_errors, type='password', autocomplete='new-password', hint='At least 8 characters with a letter and a number.') }}
+      {{ field('confirm_password', 'Confirm new password', {}, password_errors, type='password', autocomplete='new-password') }}
+      <button class="btn btn-primary" type="submit" data-loading-text="Saving…">Change password</button>
+    </form>
+  </section>
+</div>
+
+{% if current_user.role != 'admin' %}
+<section class="card card-danger" aria-labelledby="delete-title">
+  <h2 id="delete-title" class="card-title">Delete your account</h2>
+  <p>This removes your name, email, phone number{% if current_user.role == 'donor' %} and donor profile{% endif %} and signs you out. Open blood requests are cancelled and pending contact requests are closed. This cannot be undone. <a href="{{ url_for('main.privacy') }}">What is kept?</a></p>
+  <form method="post" action="{{ url_for('dashboard.delete_account') }}" class="form">
+    {{ csrf() }}
+    {{ form_alert(delete_errors) }}
+    {{ field('password', 'Confirm with your password', {}, delete_errors, type='password', autocomplete='current-password') }}
+    {{ checkbox_field('confirm_delete', 'I understand that my account will be permanently deleted', form if active == 'delete' else {}, delete_errors) }}
+    <button class="btn btn-danger" type="submit" data-confirm="Delete your account permanently? This cannot be undone.">Delete my account</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

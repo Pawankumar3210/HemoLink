@@ -1,0 +1,51 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, post_button, empty_state %}
+{% block title %}Blood request · HemoLink{% endblock %}
+{% block page_title %}Blood request{% endblock %}
+{% block page_actions %}
+{% if is_owner and blood_request.is_open %}
+  <a class="btn btn-secondary" href="{{ url_for('blood_requests.edit', request_id=blood_request.id) }}">Edit</a>
+  {{ post_button(url_for('blood_requests.fulfill', request_id=blood_request.id), 'Mark fulfilled', 'btn btn-primary', 'Mark this request as fulfilled?') }}
+  {{ post_button(url_for('blood_requests.cancel', request_id=blood_request.id), 'Cancel request', 'btn btn-danger', 'Cancel this request? Donors with open contact requests will be notified.') }}
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if blood_request.status == 'rejected' and blood_request.moderation_note and is_owner %}
+<div class="alert alert-error" role="note">{{ icon('alert', 18) }}<p>An administrator rejected this request. Reason: {{ blood_request.moderation_note }}</p></div>
+{% endif %}
+<section class="card" aria-labelledby="req-title">
+  <div class="profile-summary profile-summary-lg">
+    {{ blood_badge(blood_request.blood_group) }}
+    <div>
+      <h2 id="req-title">{{ blood_request.units_required }} unit{{ '' if blood_request.units_required == 1 else 's' }} of {{ blood_request.blood_group }}</h2>
+      <p class="muted">{{ icon('pin', 14) }} {{ blood_request.city }}, {{ blood_request.state }}</p>
+    </div>
+    <div class="cluster">{{ badge(blood_request.status) }} {{ badge(blood_request.urgency) }}</div>
+  </div>
+  <dl class="meta-list">
+    <div><dt>Needed by</dt><dd>{{ blood_request.required_by|fmt_date }}{% if blood_request.is_overdue %} <span class="muted">(date has passed)</span>{% endif %}</dd></div>
+    <div><dt>Hospital or facility</dt><dd>{{ blood_request.hospital_name or 'Not given' }}</dd></div>
+    <div><dt>Notes</dt><dd>{{ blood_request.notes or 'None' }}</dd></div>
+    <div><dt>Posted</dt><dd>{{ blood_request.created_at|fmt_datetime }}</dd></div>
+    {% if blood_request.status_changed_at %}<div><dt>Status changed</dt><dd>{{ blood_request.status_changed_at|fmt_datetime }}</dd></div>{% endif %}
+  </dl>
+  {% if not is_owner and current_user.role == 'donor' %}
+  <p class="hint">The recipient's contact details are private. If you can help, you will hear from them through a contact request that you can accept or decline.</p>
+  {% endif %}
+</section>
+
+{% if is_owner %}
+<section class="card" aria-labelledby="act-title">
+  <div class="card-header"><h2 id="act-title" class="card-title">Donor contact activity</h2><a href="{{ url_for('donors.search', blood_group=blood_request.blood_group, state=blood_request.state) }}">Find more donors</a></div>
+  {% if activity %}
+  <ul class="item-list">
+    {% for c in activity %}
+    <li><div><p><strong>{{ c.donor.full_name }}</strong> {{ badge(c.status) }}</p><p class="muted">Sent {{ c.created_at|fmt_date }}</p></div><a class="btn btn-secondary btn-sm" href="{{ url_for('contact.detail', contact_id=c.id) }}">Open</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  {{ empty_state('No contact requests for this request yet', 'Search for donors and link your contact request to this blood request.', 'users', 'Find donors', url_for('donors.search', blood_group=blood_request.blood_group, state=blood_request.state)) }}
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import stat_card, badge, empty_state %}
+{% block title %}Admin overview · HemoLink{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_sub %}<p class="muted">Live figures from the database.</p>{% endblock %}
+{% block content %}
+<div class="stat-grid stat-grid-3">
+  {{ stat_card('Registered users', stats.total_users, 'users', url_for('admin.users')) }}
+  {{ stat_card('Donors', stats.donors, 'droplet', url_for('admin.donors')) }}
+  {{ stat_card('Recipients', stats.recipients, 'user', url_for('admin.users', role='recipient')) }}
+  {{ stat_card('Available donors', stats.available_donors, 'check', url_for('admin.donors', availability='available')) }}
+  {{ stat_card('Temporarily unavailable', stats.temporarily_unavailable_donors, 'clock', url_for('admin.donors', availability='temporarily_unavailable')) }}
+  {{ stat_card('Suspended accounts', stats.suspended, 'shield', url_for('admin.users', status='suspended')) }}
+  {{ stat_card('Blood requests', stats.total_requests, 'list', url_for('admin.requests')) }}
+  {{ stat_card('Open requests', stats.open_requests, 'activity', url_for('admin.requests', status='open')) }}
+  {{ stat_card('Fulfilled requests', stats.fulfilled_requests, 'heart', url_for('admin.requests', status='fulfilled')) }}
+  {{ stat_card('Pending contact requests', stats.pending_contacts, 'inbox', url_for('admin.contacts', status='pending')) }}
+</div>
+<section class="card" aria-labelledby="recent-title">
+  <div class="card-header"><h2 id="recent-title" class="card-title">Recent activity</h2><a href="{{ url_for('admin.audit') }}">Full audit log</a></div>
+  {% if recent %}
+  <ul class="item-list">
+    {% for entry in recent %}
+    <li><div><p><strong>{{ entry.action }}</strong> {% if entry.entity_type %}<span class="muted">on {{ entry.entity_type }} {{ entry.entity_id or '' }}</span>{% endif %}</p><p class="muted">{{ entry.actor.full_name if entry.actor else 'System' }}{% if entry.details %} · {{ entry.details }}{% endif %}</p></div><time class="muted" datetime="{{ entry.created_at.isoformat() }}">{{ entry.created_at|fmt_datetime }}</time></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  {{ empty_state('No activity recorded yet', 'Administrative actions will be listed here.', 'shield') }}
+  {% endif %}
+</section>
+{% endblock %}

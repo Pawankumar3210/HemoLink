@@ -1,0 +1,35 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, page_nav, empty_state %}
+{% block title %}My blood requests · HemoLink{% endblock %}
+{% block page_title %}My blood requests{% endblock %}
+{% block page_actions %}<a class="btn btn-primary" href="{{ url_for('blood_requests.create') }}">{{ icon('plus', 16) }} New request</a>{% endblock %}
+{% block content %}
+<nav class="tabs" aria-label="Filter by status">
+  <a href="{{ url_for('blood_requests.index') }}"{% if not status %} aria-current="page"{% endif %}>All</a>
+  {% for s in ['open', 'fulfilled', 'cancelled', 'rejected'] %}<a href="{{ url_for('blood_requests.index', status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ s|label }}</a>{% endfor %}
+</nav>
+{% if pagination.items %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Your blood requests</caption>
+    <thead><tr><th scope="col">Blood group</th><th scope="col">Units</th><th scope="col">Location</th><th scope="col">Needed by</th><th scope="col">Urgency</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody>
+      {% for r in pagination.items %}
+      <tr>
+        <td data-label="Blood group">{{ blood_badge(r.blood_group) }}</td>
+        <td data-label="Units">{{ r.units_required }}</td>
+        <td data-label="Location">{{ r.city }}, {{ r.state }}</td>
+        <td data-label="Needed by">{{ r.required_by|fmt_date }}{% if r.is_overdue %} <span class="muted">(past)</span>{% endif %}</td>
+        <td data-label="Urgency">{{ badge(r.urgency) }}</td>
+        <td data-label="Status">{{ badge(r.status) }}</td>
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('blood_requests.detail', request_id=r.id) }}">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No requests here', 'Post a blood request so donors can see what you need.' if not status else 'You have no requests with this status.', 'list', 'Create a request', url_for('blood_requests.create')) }}
+{% endif %}
+{% endblock %}

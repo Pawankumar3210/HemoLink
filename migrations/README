@@ -1,0 +1,5 @@
+Single-database Alembic configuration managed through Flask-Migrate.
+
+    flask db upgrade      # apply migrations
+    flask db migrate -m "describe change"   # generate a new migration
+    flask db check        # fail if the models and migrations disagree

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}About HemoLink · HemoLink{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container-narrow">
+  <h1>About HemoLink</h1>
+  <p class="lead">HemoLink is a blood donor registration and search portal that connects voluntary donors with people who are looking for them.</p>
+</div></section>
+<section class="section"><div class="container-narrow prose">
+  <h2>The problem</h2>
+  <p>When someone needs blood urgently, finding a donor often means messaging friends, forwarding social media posts and calling around. Information is scattered, contact lists go out of date, and it is hard to tell who is actually willing and nearby.</p>
+  <h2>What HemoLink does</h2>
+  <p>HemoLink keeps one searchable, up-to-date list of donors who chose to be found. Recipients filter by blood group and location, send a short contact request, and see the donor's phone number only if the donor accepts. Administrators keep the platform healthy by moderating requests and accounts.</p>
+  <h2>What HemoLink does not do</h2>
+  <ul>
+    <li>It is not a blood bank, hospital or emergency service.</li>
+    <li>It does not verify anyone's identity or medical eligibility to donate. Availability is self-reported.</li>
+    <li>It does not give medical advice. A hospital or doctor must confirm what a patient needs and whether a donor can donate.</li>
+  </ul>
+  <h2>Principles</h2>
+  <ul>
+    <li><strong>Consent first.</strong> Donors decide whether to appear in search and whether to share their number.</li>
+    <li><strong>Data minimization.</strong> No street addresses, no GPS, no medical records.</li>
+    <li><strong>Transparency.</strong> Every administrative action is recorded in an audit log.</li>
+  </ul>
+  <h2>About this project</h2>
+  <p>HemoLink was built as an academic DevOps project. It demonstrates a complete lifecycle: a Flask and MySQL application, automated tests, containers, continuous integration and a deployment pipeline. It supports <a href="{{ url_for('main.sdg3') }}">United Nations Sustainable Development Goal 3</a>.</p>
+</div></section>
+{% endblock %}

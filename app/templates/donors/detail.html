@@ -1,0 +1,39 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge %}
+{% block title %}{{ profile.user.full_name }} · HemoLink{% endblock %}
+{% block page_title %}Donor profile{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('donors.search') }}">Back to search</a>{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="dd-title">
+    <div class="profile-summary profile-summary-lg">
+      <span class="avatar avatar-xl" aria-hidden="true">{{ profile.user.full_name|initials }}</span>
+      <div>
+        <h2 id="dd-title">{{ profile.user.full_name }}</h2>
+        <p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p>
+      </div>
+      {{ blood_badge(profile.blood_group) }}
+    </div>
+    <dl class="meta-list">
+      <div><dt>Blood group</dt><dd>{{ profile.blood_group }}</dd></div>
+      <div><dt>Availability</dt><dd>{{ badge(profile.availability_status) }}</dd></div>
+      <div><dt>Last donation</dt><dd>{% if profile.public_last_donation_date %}{{ profile.public_last_donation_date|fmt_date }}{% else %}Not shared by the donor{% endif %}</dd></div>
+      <div><dt>Member since</dt><dd>{{ profile.created_at|fmt_date }}</dd></div>
+    </dl>
+  </section>
+  <section class="card" aria-labelledby="cc-title">
+    <h2 id="cc-title" class="card-title">Contact this donor</h2>
+    <p>Contact details are private. Send a short request, and the donor will decide whether to share their phone number with you.</p>
+    {% if existing and existing.status == 'pending' %}
+      <div class="alert alert-info" role="status">{{ icon('clock', 18) }}<p>You already have a pending request with this donor. <a href="{{ url_for('contact.detail', contact_id=existing.id) }}">View it</a>.</p></div>
+    {% elif existing and existing.recipient_can_view_contact %}
+      <div class="alert alert-success" role="status">{{ icon('check', 18) }}<p>This donor accepted your request. <a href="{{ url_for('contact.detail', contact_id=existing.id) }}">View contact details</a>.</p></div>
+    {% elif profile.availability_status == 'unavailable' %}
+      <div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>This donor is not accepting contact requests right now.</p></div>
+    {% else %}
+      <a class="btn btn-primary" href="{{ url_for('contact.request_form', profile_id=profile.id) }}">Request contact</a>
+    {% endif %}
+    <p class="hint">HemoLink does not verify medical eligibility. Always confirm with the hospital before anyone donates.</p>
+  </section>
+</div>
+{% endblock %}

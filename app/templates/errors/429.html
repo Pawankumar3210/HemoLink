@@ -1,0 +1,5 @@
+{% extends "errors/_base.html" %}
+{% block title %}Too many attempts · HemoLink{% endblock %}
+{% block code %}429{% endblock %}
+{% block heading %}Too many attempts{% endblock %}
+{% block message %}You have made too many requests in a short time. {% if retry_after %}Please wait about {{ retry_after }} seconds and try again.{% else %}Please wait a moment and try again.{% endif %}{% endblock %}

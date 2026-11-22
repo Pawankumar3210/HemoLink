@@ -1,0 +1,17 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import csrf, form_alert %}
+{% block title %}Edit donor profile · HemoLink{% endblock %}
+{% block page_title %}Edit donor profile{% endblock %}
+{% block content %}
+<section class="card card-form">
+  <form method="post" class="form" data-loading-form>
+    {{ csrf() }}
+    {{ form_alert(errors) }}
+    {% include "partials/_donor_fields.html" %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" data-loading-text="Saving…">Save profile</button>
+      <a class="btn btn-ghost" href="{{ url_for('donors.profile') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

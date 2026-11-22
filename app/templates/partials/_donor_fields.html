@@ -1,0 +1,20 @@
+{% from "partials/_macros.html" import field, select_field, checkbox_field %}
+{% set availability_form = form if form.get('availability_status') else {'availability_status': 'available'} %}
+<fieldset class="fieldset">
+  <legend>Donor details</legend>
+  <div class="field-row">
+    {{ select_field('blood_group', 'Blood group', BLOOD_GROUPS, form, errors, placeholder='Select blood group') }}
+    {{ field('age', 'Age', form, errors, type='number', inputmode='numeric', min=18, max=65, hint='Donors must be 18 to 65 years old.') }}
+  </div>
+  <div class="field-row">
+    {{ select_field('state', 'State', INDIAN_STATES, form, errors, placeholder='Select state') }}
+    {{ field('city', 'City', form, errors, autocomplete='address-level2', maxlength=80) }}
+  </div>
+  <div class="field-row">
+    {{ select_field('gender', 'Gender', GENDERS, form, errors, required=false, placeholder='Prefer not to say') }}
+    {{ field('last_donation_date', 'Last blood donation date', form, errors, type='date', required=false, max=today_iso) }}
+  </div>
+  {{ select_field('availability_status', 'Availability', AVAILABILITY_OPTIONS, availability_form, errors, placeholder='Select availability', hint='This is self-reported. HemoLink does not check medical eligibility.') }}
+  {{ checkbox_field('visible_in_search', 'Show me in donor search', form, errors, hint='Recipients can then find you by blood group and location. Your phone number stays hidden until you accept a request.') }}
+  {{ checkbox_field('share_last_donation_date', 'Show my last donation date on my public profile', form, errors) }}
+</fieldset>

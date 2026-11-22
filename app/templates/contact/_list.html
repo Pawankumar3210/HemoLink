@@ -1,0 +1,34 @@
+{# Shared contact-request table. Expects ``pagination`` and ``view`` ('donor' or 'recipient'). #}
+{% from "partials/_macros.html" import badge, blood_badge, page_nav, post_button %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Contact requests</caption>
+    <thead><tr>
+      <th scope="col">{{ 'From' if view == 'donor' else 'Donor' }}</th>
+      <th scope="col">Linked request</th>
+      <th scope="col">Sent</th>
+      <th scope="col">Status</th>
+      <th scope="col"><span class="sr-only">Actions</span></th>
+    </tr></thead>
+    <tbody>
+      {% for c in pagination.items %}
+      <tr>
+        <td data-label="{{ 'From' if view == 'donor' else 'Donor' }}">{{ (c.recipient if view == 'donor' else c.donor).full_name }}</td>
+        <td data-label="Linked request">{% if c.blood_request %}{{ blood_badge(c.blood_request.blood_group) }} {{ c.blood_request.city }}{% else %}<span class="muted">None</span>{% endif %}</td>
+        <td data-label="Sent">{{ c.created_at|fmt_date }}</td>
+        <td data-label="Status">{{ badge(c.status) }}{% if c.access_revoked %} <span class="muted small">(access ended)</span>{% endif %}</td>
+        <td class="row-actions">
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('contact.detail', contact_id=c.id) }}">{{ 'Review' if view == 'donor' and c.status == 'pending' else 'Open' }}</a>
+          {% if view == 'donor' and c.status == 'pending' %}
+            {{ post_button(url_for('contact.accept', contact_id=c.id), 'Accept', 'btn btn-primary btn-sm') }}
+            {{ post_button(url_for('contact.decline', contact_id=c.id), 'Decline', 'btn btn-ghost btn-sm', 'Decline this request? Your details stay private.') }}
+          {% elif view == 'recipient' and c.status == 'pending' %}
+            {{ post_button(url_for('contact.withdraw', contact_id=c.id), 'Withdraw', 'btn btn-ghost btn-sm', 'Withdraw this contact request?') }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}

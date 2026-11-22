@@ -1,0 +1,36 @@
+{% from "partials/_macros.html" import logo %}
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      {{ logo() }}
+      <p class="tagline">Connecting Donors. Saving Lives.</p>
+      <p class="fine">HemoLink is an academic coordination project. It is not a blood bank, a medical authority or an emergency service. In an emergency, contact your hospital or local emergency number.</p>
+    </div>
+    <nav aria-label="Explore">
+      <h2>Explore</h2>
+      <ul>
+        <li><a href="{{ url_for('main.about') }}">About HemoLink</a></li>
+        <li><a href="{{ url_for('main.how_it_works') }}">How it works</a></li>
+        <li><a href="{{ url_for('main.sdg3') }}">SDG 3 alignment</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Account">
+      <h2>Join</h2>
+      <ul>
+        <li><a href="{{ url_for('auth.register_donor') }}">Become a donor</a></li>
+        <li><a href="{{ url_for('auth.register_recipient') }}">Find donors</a></li>
+        <li><a href="{{ url_for('auth.login') }}">Log in</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Legal">
+      <h2>Legal</h2>
+      <ul>
+        <li><a href="{{ url_for('main.privacy') }}">Privacy policy</a></li>
+        <li><a href="{{ url_for('main.terms') }}">Terms of use</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container footer-base">
+    <p>&copy; {{ current_year }} HemoLink. Built as a DevOps academic project supporting UN Sustainable Development Goal 3.</p>
+  </div>
+</footer>

@@ -1,0 +1,70 @@
+# Local development stack: HemoLink + MySQL 8.
+#   docker compose up --build            start everything
+#   docker compose run --rm test         run the test suite against MySQL
+# Configuration comes from .env (copy .env.example). Data lives in the named volume
+# "db_data" and is never deleted automatically.
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?set MYSQL_DATABASE in .env}
+      MYSQL_USER: ${MYSQL_USER:?set MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    # The database port is intentionally not published to the host.
+
+  web:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      FLASK_DEBUG: "0"
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?charset=utf8mb4
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-1}
+      ALLOW_DEMO_SEED: ${ALLOW_DEMO_SEED:-true}
+      SESSION_COOKIE_SECURE: "false"
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      MAIL_SERVER: ${MAIL_SERVER:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-HemoLink <no-reply@example.com>}
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+
+  test:
+    build:
+      context: .
+      target: dev
+    profiles: ["test"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: testing
+      TEST_USE_MIGRATIONS: "1"
+      TEST_DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}_test?charset=utf8mb4
+    command: ["pytest", "--cov=app", "--cov-report=term-missing"]
+
+volumes:
+  db_data:

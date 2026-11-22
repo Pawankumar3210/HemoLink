@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}How it works · HemoLink{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container-narrow">
+  <h1>How HemoLink works</h1>
+  <p class="lead">Two kinds of accounts, one consent-based flow.</p>
+</div></section>
+<section class="section"><div class="container grid grid-2">
+  <article class="card">
+    <h2>If you want to donate</h2>
+    <ol class="plain-steps">
+      <li>Register as a donor with your blood group, age, state and city.</li>
+      <li>Choose whether you appear in donor search. You can change this any time.</li>
+      <li>Keep your availability up to date: available, temporarily unavailable or unavailable.</li>
+      <li>When a recipient asks to contact you, read their message and accept or decline.</li>
+      <li>If you accept, they can see your phone number. You can end that access later.</li>
+    </ol>
+    <a class="btn btn-primary" href="{{ url_for('auth.register_donor') }}">Become a donor</a>
+  </article>
+  <article class="card">
+    <h2>If you need a donor</h2>
+    <ol class="plain-steps">
+      <li>Register as a recipient.</li>
+      <li>Post a blood request with the group, units, location and date needed.</li>
+      <li>Search donors by blood group, state, city and availability.</li>
+      <li>Send a short contact request. Requests are rate limited so donors are not flooded.</li>
+      <li>When a donor accepts, their phone number appears on the request page. Then mark your request fulfilled.</li>
+    </ol>
+    <a class="btn btn-primary" href="{{ url_for('auth.register_recipient') }}">Find donors</a>
+  </article>
+</div></section>
+<section class="section section-alt"><div class="container-narrow">
+  <h2>Questions</h2>
+  <details class="faq"><summary>Can I see a donor's phone number in search?</summary><p>No. Search shows name, blood group, city, state and availability. The phone number is revealed only on your contact request page after the donor accepts.</p></details>
+  <details class="faq"><summary>Is a donor confirmed to be medically fit?</summary><p>No. Availability is self-reported. A hospital or doctor decides whether a person can donate.</p></details>
+  <details class="faq"><summary>What if a donor declines?</summary><p>Their details stay hidden. You can search for other donors. Repeated requests to a donor who declined are paused for a few days.</p></details>
+  <details class="faq"><summary>Can I delete my account?</summary><p>Yes. From Account settings you can delete your account. Your personal details are removed. See the <a href="{{ url_for('main.privacy') }}">privacy policy</a> for what is kept.</p></details>
+</div></section>
+{% endblock %}

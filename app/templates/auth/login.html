@@ -1,0 +1,18 @@
+{% extends "layouts/auth.html" %}
+{% from "partials/_macros.html" import field, csrf, form_alert %}
+{% block title %}Log in · HemoLink{% endblock %}
+{% block auth_content %}
+<h1>Welcome back</h1>
+<p class="muted">Log in to manage your profile, requests and contact messages.</p>
+<form method="post" class="form" data-loading-form>
+  {{ csrf() }}
+  <input type="hidden" name="next" value="{{ next_url }}">
+  {{ form_alert(errors) }}
+  {{ field('email', 'Email address', form, errors, type='email', autocomplete='email', autofocus=true) }}
+  {{ field('password', 'Password', form, errors, type='password', autocomplete='current-password') }}
+  <label class="check show-password"><input type="checkbox" data-toggle-password="f-password"><span>Show password</span></label>
+  <button class="btn btn-primary btn-block" type="submit" data-loading-text="Signing in…">Log in</button>
+</form>
+<p class="auth-links"><a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a></p>
+<p class="auth-links">New to HemoLink? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import page_nav, empty_state %}
+{% block title %}Audit log · HemoLink admin{% endblock %}
+{% block page_title %}Audit log{% endblock %}
+{% block page_sub %}<p class="muted">Administrative and security-relevant actions. Entries never include passwords or tokens.</p>{% endblock %}
+{% block content %}
+<section class="card" aria-label="Filter">
+  <form method="get" class="filter-bar">
+    <div class="field"><label for="a-action">Action starts with</label><input id="a-action" name="action" type="text" maxlength="40" value="{{ filters.action }}" placeholder="e.g. user. or request."></div>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.audit') }}">Clear</a>
+  </form>
+</section>
+{% if pagination.items %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Audit entries</caption>
+    <thead><tr><th scope="col">When</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Target</th><th scope="col">Details</th></tr></thead>
+    <tbody>
+      {% for e in pagination.items %}
+      <tr>
+        <td data-label="When">{{ e.created_at|fmt_datetime }}</td>
+        <td data-label="Actor">{{ e.actor.full_name if e.actor else 'System' }}</td>
+        <td data-label="Action"><code>{{ e.action }}</code></td>
+        <td data-label="Target">{% if e.entity_type %}{{ e.entity_type }} {{ e.entity_id or '' }}{% else %}-{% endif %}</td>
+        <td data-label="Details">{{ e.details or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No audit entries', 'Nothing matches this filter yet.', 'shield') }}
+{% endif %}
+{% endblock %}

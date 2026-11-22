@@ -1,0 +1,22 @@
+{# Donor result card. Expects ``profile``. Never shows phone or email. #}
+{% from "partials/_macros.html" import icon, badge, blood_badge %}
+<article class="donor-card">
+  <header>
+    <span class="avatar avatar-lg" aria-hidden="true">{{ profile.user.full_name|initials }}</span>
+    <div>
+      <h3>{{ profile.user.full_name }}</h3>
+      <p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p>
+    </div>
+    {{ blood_badge(profile.blood_group) }}
+  </header>
+  <p>{{ badge(profile.availability_status) }}</p>
+  <p class="muted small">{% if profile.public_last_donation_date %}Last donated {{ profile.public_last_donation_date|fmt_date }}{% else %}Last donation not shared{% endif %}</p>
+  <footer>
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('donors.detail', profile_id=profile.id) }}">View profile</a>
+    {% if profile.availability_status == 'unavailable' %}
+    <button class="btn btn-primary btn-sm" type="button" disabled>Not accepting requests</button>
+    {% else %}
+    <a class="btn btn-primary btn-sm" href="{{ url_for('contact.request_form', profile_id=profile.id) }}">Request contact</a>
+    {% endif %}
+  </footer>
+</article>

@@ -1,0 +1,20 @@
+{% extends "layouts/auth.html" %}
+{% from "partials/_macros.html" import icon %}
+{% block title %}Create an account · HemoLink{% endblock %}
+{% block auth_content %}
+<h1>Create your account</h1>
+<p class="muted">Choose the option that fits you. You can only hold one role per account.</p>
+<div class="choice-grid">
+  <a class="choice-card" href="{{ url_for('auth.register_donor') }}">
+    {{ icon('droplet', 28) }}
+    <h2>I want to donate</h2>
+    <p>Register as a donor, set your availability and respond to contact requests.</p>
+  </a>
+  <a class="choice-card" href="{{ url_for('auth.register_recipient') }}">
+    {{ icon('search', 28) }}
+    <h2>I need a donor</h2>
+    <p>Register as a recipient to search donors and post blood requests.</p>
+  </a>
+</div>
+<p class="auth-links">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+{% endblock %}

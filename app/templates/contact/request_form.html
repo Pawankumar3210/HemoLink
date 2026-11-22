@@ -1,0 +1,33 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, blood_badge, badge, textarea_field, csrf, form_alert %}
+{% block title %}Request contact · HemoLink{% endblock %}
+{% block page_title %}Request contact{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('donors.detail', profile_id=profile.id) }}">Back to profile</a>{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <section class="card card-form">
+    <form method="post" class="form" data-loading-form>
+      {{ csrf() }}
+      {{ form_alert(errors) }}
+      {{ textarea_field('message', 'Message to the donor', form, errors, rows=5, hint='Say who needs blood, where and when. Do not include medical records. 10 to 500 characters.', placeholder='Hello, my relative needs blood at … on …') }}
+      {% if my_requests %}
+      <div class="field{% if errors.get('blood_request_id') %} has-error{% endif %}">
+        <label for="f-blood_request_id">Link to one of your open requests <span class="optional">(optional)</span></label>
+        <select id="f-blood_request_id" name="blood_request_id">
+          <option value="">No linked request</option>
+          {% for r in my_requests %}<option value="{{ r.id }}"{% if form.get('blood_request_id') | string == r.id | string %} selected{% endif %}>{{ r.blood_group }} · {{ r.units_required }} unit{{ '' if r.units_required == 1 else 's' }} · {{ r.city }} · by {{ r.required_by|fmt_date }}</option>{% endfor %}
+        </select>
+        {% if errors.get('blood_request_id') %}<p class="error-text" role="alert">{{ errors['blood_request_id'] }}</p>{% endif %}
+      </div>
+      {% endif %}
+      <div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>If the donor accepts, they will see your phone number too, so you can coordinate directly. If they decline, nothing is shared.</p></div>
+      <button class="btn btn-primary" type="submit" data-loading-text="Sending…">Send request</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="who-title">
+    <h2 id="who-title" class="card-title">Donor</h2>
+    <div class="profile-summary"><span class="avatar avatar-lg" aria-hidden="true">{{ profile.user.full_name|initials }}</span><div><p><strong>{{ profile.user.full_name }}</strong></p><p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p></div>{{ blood_badge(profile.blood_group) }}</div>
+    <p>{{ badge(profile.availability_status) }}</p>
+  </section>
+</div>
+{% endblock %}

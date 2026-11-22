@@ -1,0 +1,77 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, badge, blood_badge, stat_card, empty_state %}
+{% block title %}Recipient dashboard · HemoLink{% endblock %}
+{% block page_title %}Hello, {{ current_user.full_name.split()[0] }}{% endblock %}
+{% block page_sub %}<p class="muted">Find donors and track your requests.</p>{% endblock %}
+{% block page_actions %}<a class="btn btn-primary" href="{{ url_for('blood_requests.create') }}">{{ icon('plus', 16) }} New blood request</a>{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  {{ stat_card('Open requests', stats.open_requests, 'list', url_for('blood_requests.index', status='open')) }}
+  {{ stat_card('Fulfilled', stats.fulfilled_requests, 'check', url_for('blood_requests.index', status='fulfilled')) }}
+  {{ stat_card('Awaiting donor reply', stats.pending_contacts, 'clock', url_for('contact.tracking')) }}
+  {{ stat_card('Donors who accepted', stats.accepted_contacts, 'users', url_for('contact.tracking')) }}
+</div>
+
+<section class="card" aria-labelledby="quick-title">
+  <h2 id="quick-title" class="card-title">Find a donor</h2>
+  <form method="get" action="{{ url_for('donors.search') }}" class="filter-bar">
+    <div class="field">
+      <label for="q-group">Blood group</label>
+      <select id="q-group" name="blood_group"><option value="">Any</option>{% for g in BLOOD_GROUPS %}<option value="{{ g }}">{{ g }}</option>{% endfor %}</select>
+    </div>
+    <div class="field">
+      <label for="q-state">State</label>
+      <select id="q-state" name="state"><option value="">Any</option>{% for s in INDIAN_STATES %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
+    </div>
+    <div class="field">
+      <label for="q-city">City</label>
+      <input id="q-city" name="city" type="text" maxlength="80" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" type="submit">{{ icon('search', 16) }} Search</button>
+  </form>
+</section>
+
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="open-title">
+    <div class="card-header"><h2 id="open-title" class="card-title">Your open requests</h2><a href="{{ url_for('blood_requests.index') }}">View all</a></div>
+    {% if open_requests %}
+    <ul class="item-list">
+      {% for r in open_requests %}
+      <li>
+        <div><p>{{ blood_badge(r.blood_group) }} <strong>{{ r.units_required }} unit{{ '' if r.units_required == 1 else 's' }}</strong> in {{ r.city }}</p><p class="muted">Needed by {{ r.required_by|fmt_date }} {{ badge(r.urgency) }}</p></div>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('blood_requests.detail', request_id=r.id) }}">View</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    {{ empty_state('No open requests', 'Post a request so donors nearby can see what you need.', 'list', 'Create a request', url_for('blood_requests.create')) }}
+    {% endif %}
+  </section>
+  <section class="card" aria-labelledby="contacts-title">
+    <div class="card-header"><h2 id="contacts-title" class="card-title">Recent contact requests</h2><a href="{{ url_for('contact.tracking') }}">View all</a></div>
+    {% if contact_requests %}
+    <ul class="item-list">
+      {% for c in contact_requests %}
+      <li>
+        <div><p><strong>{{ c.donor.full_name }}</strong> {{ badge(c.status) }}</p><p class="muted">Sent {{ c.created_at|fmt_date }}</p></div>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('contact.detail', contact_id=c.id) }}">Open</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    {{ empty_state('No contact requests yet', 'Search for a donor and send a request to get started.', 'users', 'Find donors', url_for('donors.search')) }}
+    {% endif %}
+  </section>
+</div>
+
+<section class="card" aria-labelledby="rn-title">
+  <div class="card-header"><h2 id="rn-title" class="card-title">Recent notifications</h2><a href="{{ url_for('notifications.index') }}">View all</a></div>
+  {% if notifications %}
+  <ul class="item-list">
+    {% for n in notifications %}<li><div><p><strong>{{ n.title }}</strong></p><p class="muted">{{ n.message }}</p></div><time class="muted" datetime="{{ n.created_at.isoformat() }}">{{ n.created_at|fmt_date }}</time></li>{% endfor %}
+  </ul>
+  {% else %}
+  {{ empty_state('No notifications yet', 'Updates about your requests will show up here.', 'bell') }}
+  {% endif %}
+</section>
+{% endblock %}

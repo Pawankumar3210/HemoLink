@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import badge, page_nav, empty_state %}
+{% block title %}Users · HemoLink admin{% endblock %}
+{% block page_title %}Users{% endblock %}
+{% block content %}
+<section class="card" aria-label="Filters">
+  <form method="get" class="filter-bar">
+    <div class="field"><label for="u-q">Name or email</label><input id="u-q" name="q" type="search" maxlength="100" value="{{ filters.q }}"></div>
+    <div class="field"><label for="u-role">Role</label><select id="u-role" name="role"><option value="">Any</option>{% for r in ['donor', 'recipient', 'admin'] %}<option value="{{ r }}"{% if filters.role == r %} selected{% endif %}>{{ r|label }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="u-status">Status</label><select id="u-status" name="status"><option value="">Any</option>{% for s in ['active', 'suspended', 'deleted'] %}<option value="{{ s }}"{% if filters.status == s %} selected{% endif %}>{{ s|label }}</option>{% endfor %}</select></div>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.users') }}">Clear</a>
+  </form>
+</section>
+{% if pagination.items %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Registered users</caption>
+    <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody>
+      {% for u in pagination.items %}
+      <tr>
+        <td data-label="Name">{{ u.full_name }}</td>
+        <td data-label="Email">{{ u.email }}</td>
+        <td data-label="Role">{{ u.role|label }}</td>
+        <td data-label="Status">{{ badge(u.account_status) }}</td>
+        <td data-label="Joined">{{ u.created_at|fmt_date }}</td>
+        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('admin.user_detail', user_id=u.id) }}">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No users match', 'Try removing a filter.', 'users') }}
+{% endif %}
+{% endblock %}

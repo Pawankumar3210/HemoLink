@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "partials/_macros.html" import icon, logo, csrf %}
+{% block body_class %}is-app{% endblock %}
+{% block shell %}
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar" aria-label="Account navigation">
+    <a class="sidebar-brand" href="{{ url_for('dashboard.home') }}" aria-label="HemoLink dashboard">{{ logo() }}</a>
+    {% if current_user.role == 'admin' %}<p class="sidebar-role">Administrator console</p>{% endif %}
+    <nav>
+      <ul class="side-nav">
+        {% for item in nav_items() %}
+        <li>
+          <a class="side-link{% if item.active %} is-active{% endif %}" href="{{ url_for(item.endpoint) }}"{% if item.active %} aria-current="page"{% endif %}>
+            {{ icon(item.icon, 18) }}<span>{{ item.label }}</span>
+            {% if item.is_notifications and unread_count() %}<span class="count-pill" aria-label="{{ unread_count() }} unread">{{ unread_count() }}</span>{% endif %}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <span class="avatar" aria-hidden="true">{{ current_user.full_name|initials }}</span>
+        <span class="user-chip-text"><strong>{{ current_user.full_name }}</strong><small>{{ current_user.role|label }}</small></span>
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        {{ csrf() }}
+        <button type="submit" class="btn btn-ghost btn-sm btn-block">{{ icon('logout', 16) }} Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="app-main">
+    <header class="app-topbar">
+      <button class="nav-toggle" type="button" data-sidebar-toggle aria-expanded="false" aria-controls="sidebar" aria-label="Open navigation">{{ icon('menu', 22) }}</button>
+      <a class="brand-compact" href="{{ url_for('dashboard.home') }}" aria-label="HemoLink dashboard">{{ logo(28) }}</a>
+      <a class="topbar-bell" href="{{ url_for('notifications.index') }}" aria-label="Notifications{% if unread_count() %}, {{ unread_count() }} unread{% endif %}">
+        {{ icon('bell', 20) }}{% if unread_count() %}<span class="count-pill">{{ unread_count() }}</span>{% endif %}
+      </a>
+    </header>
+    <main id="main" class="app-content">
+      {% include "partials/_flash.html" %}
+      <div class="page-header">
+        <div>
+          <h1>{% block page_title %}{% endblock %}</h1>
+          {% block page_sub %}{% endblock %}
+        </div>
+        <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+      </div>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import badge, page_nav, empty_state %}
+{% block title %}Contact requests · HemoLink admin{% endblock %}
+{% block page_title %}Contact requests{% endblock %}
+{% block page_sub %}<p class="muted">Activity overview. Phone numbers are not shown on this page.</p>{% endblock %}
+{% block content %}
+<nav class="tabs" aria-label="Filter by status">
+  <a href="{{ url_for('admin.contacts') }}"{% if not filters.status %} aria-current="page"{% endif %}>All</a>
+  {% for s in ['pending', 'accepted', 'declined', 'withdrawn'] %}<a href="{{ url_for('admin.contacts', status=s) }}"{% if filters.status == s %} aria-current="page"{% endif %}>{{ s|label }}</a>{% endfor %}
+</nav>
+{% if pagination.items %}
+<div class="table-wrap">
+  <table class="table">
+    <caption class="sr-only">Contact requests</caption>
+    <thead><tr><th scope="col">Recipient</th><th scope="col">Donor</th><th scope="col">Status</th><th scope="col">Sent</th><th scope="col">Answered</th></tr></thead>
+    <tbody>
+      {% for c in pagination.items %}
+      <tr>
+        <td data-label="Recipient">{{ c.recipient.full_name }}</td>
+        <td data-label="Donor">{{ c.donor.full_name }}</td>
+        <td data-label="Status">{{ badge(c.status) }}{% if c.access_revoked %} <span class="muted small">(access ended)</span>{% endif %}</td>
+        <td data-label="Sent">{{ c.created_at|fmt_date }}</td>
+        <td data-label="Answered">{{ c.responded_at|fmt_date if c.responded_at else 'Not yet' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ page_nav(pagination) }}
+{% else %}
+{{ empty_state('No contact requests', 'None match this filter yet.', 'inbox') }}
+{% endif %}
+{% endblock %}

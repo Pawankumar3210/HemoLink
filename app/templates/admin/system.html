@@ -1,0 +1,30 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import badge %}
+{% block title %}System · HemoLink admin{% endblock %}
+{% block page_title %}System information{% endblock %}
+{% block page_sub %}<p class="muted">Runtime facts for troubleshooting. No secrets are shown.</p>{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="rt-title">
+    <h2 id="rt-title" class="card-title">Runtime</h2>
+    <dl class="meta-list">
+      <div><dt>Application version</dt><dd>{{ info.app_version }}</dd></div>
+      <div><dt>Environment</dt><dd>{{ info.environment }}</dd></div>
+      <div><dt>Python</dt><dd>{{ info.python }}</dd></div>
+      <div><dt>Flask</dt><dd>{{ info.flask }}</dd></div>
+      <div><dt>Process uptime</dt><dd>{{ info.uptime_minutes }} minutes</dd></div>
+      <div><dt>Rate limiting</dt><dd>{{ info.rate_limiting }}</dd></div>
+      <div><dt>Secure cookies</dt><dd>{{ info.secure_cookies }}</dd></div>
+      <div><dt>Email delivery</dt><dd>{{ info.mail }}</dd></div>
+    </dl>
+  </section>
+  <section class="card" aria-labelledby="db-title">
+    <h2 id="db-title" class="card-title">Database</h2>
+    <dl class="meta-list">
+      <div><dt>Status</dt><dd>{{ info.database.status|capitalize }}</dd></div>
+      <div><dt>Engine</dt><dd>{{ info.dialect }} {{ info.database.version }}</dd></div>
+      {% for name, count in info.counts.items() %}<div><dt>{{ name }}</dt><dd>{{ count }}</dd></div>{% endfor %}
+    </dl>
+  </section>
+</div>
+{% endblock %}

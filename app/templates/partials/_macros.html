@@ -1,0 +1,177 @@
+{#- Reusable UI components. Import with: {% from "partials/_macros.html" import ... %} -#}
+{% set ICONS = {
+  "home": '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  "users": '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6"/><path d="M18.5 14.8c2 .8 3 2.4 3 5.2"/>',
+  "toggle": '<rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="16" cy="12" r="3"/>',
+  "inbox": '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
+  "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  "list": '<path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  "bell": '<path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  "settings": '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  "search": '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  "plus": '<path d="M12 5v14M5 12h14"/>',
+  "droplet": '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  "shield": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  "activity": '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  "check": '<path d="M5 12.5l4.5 4.5L19 7"/>',
+  "x": '<path d="M6 6l12 12M18 6L6 18"/>',
+  "pin": '<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  "phone": '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  "lock": '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  "menu": '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  "logout": '<path d="M9 4H5v16h4"/><path d="M16 8l4 4-4 4M20 12H9"/>',
+  "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+  "alert": '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/>',
+  "calendar": '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  "heart": '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
+  "globe": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'
+} %}
+
+{% macro icon(name, size=20) -%}
+<svg class="icon" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{{ ICONS[name]|safe }}</svg>
+{%- endmacro %}
+
+{% macro logo(size=32, with_text=true) -%}
+<span class="logo">
+  <img src="{{ url_for('static', filename='images/logo-mark.svg') }}" width="{{ size }}" height="{{ size }}" alt="{{ '' if with_text else 'HemoLink' }}">
+  {% if with_text %}<span class="logo-text">HemoLink</span>{% endif %}
+</span>
+{%- endmacro %}
+
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro form_alert(errors) -%}
+{% if errors and errors.get('form') %}
+<div class="alert alert-error" role="alert">{{ icon('alert', 18) }}<p>{{ errors['form'] }}</p></div>
+{% endif %}
+{%- endmacro %}
+
+{% macro _describedby(name, hint, errors) -%}
+{%- set ids = [] -%}
+{%- if hint %}{% set _ = ids.append('h-' ~ name) %}{% endif -%}
+{%- if errors.get(name) %}{% set _ = ids.append('e-' ~ name) %}{% endif -%}
+{%- if ids %} aria-describedby="{{ ids|join(' ') }}"{% endif -%}
+{%- endmacro %}
+
+{% macro field(name, label, form, errors, type='text', required=true, autocomplete=none, hint=none, placeholder=none, maxlength=none, inputmode=none, min=none, max=none, autofocus=false) -%}
+{%- set val = '' if type == 'password' else form.get(name, '') -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if not required %} <span class="optional">(optional)</span>{% endif %}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ val }}"
+    {%- if required %} required{% endif %}
+    {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
+    {%- if placeholder %} placeholder="{{ placeholder }}"{% endif %}
+    {%- if maxlength %} maxlength="{{ maxlength }}"{% endif %}
+    {%- if inputmode %} inputmode="{{ inputmode }}"{% endif %}
+    {%- if min is not none %} min="{{ min }}"{% endif %}
+    {%- if max is not none %} max="{{ max }}"{% endif %}
+    {%- if autofocus %} autofocus{% endif %}
+    {%- if errors.get(name) %} aria-invalid="true"{% endif %}
+    {{- _describedby(name, hint, errors) }}>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if errors.get(name) %}<p class="error-text" id="e-{{ name }}" role="alert">{{ errors[name] }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro select_field(name, label, options, form, errors, required=true, placeholder='Select an option', hint=none) -%}
+{%- set current = form.get(name, '') | string -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if not required %} <span class="optional">(optional)</span>{% endif %}</label>
+  <select id="f-{{ name }}" name="{{ name }}"
+    {%- if required %} required{% endif %}
+    {%- if errors.get(name) %} aria-invalid="true"{% endif %}
+    {{- _describedby(name, hint, errors) }}>
+    <option value="">{{ placeholder }}</option>
+    {% for option in options -%}
+      {%- if option is string %}{% set v = option %}{% set l = option %}{% else %}{% set v = option[0] %}{% set l = option[1] %}{% endif -%}
+      <option value="{{ v }}"{% if current == v %} selected{% endif %}>{{ l }}</option>
+    {%- endfor %}
+  </select>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if errors.get(name) %}<p class="error-text" id="e-{{ name }}" role="alert">{{ errors[name] }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro textarea_field(name, label, form, errors, rows=4, maxlength=500, required=true, hint=none, placeholder=none) -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if not required %} <span class="optional">(optional)</span>{% endif %}</label>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}" maxlength="{{ maxlength }}"
+    {%- if required %} required{% endif %}
+    {%- if placeholder %} placeholder="{{ placeholder }}"{% endif %}
+    {%- if errors.get(name) %} aria-invalid="true"{% endif %}
+    {{- _describedby(name, hint, errors) }}>{{ form.get(name, '') or '' }}</textarea>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if errors.get(name) %}<p class="error-text" id="e-{{ name }}" role="alert">{{ errors[name] }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro checkbox_field(name, label, form, errors, hint=none) -%}
+{%- set checked = form.get(name) in ['on', 'true', '1', true] -%}
+<div class="field field-check{% if errors.get(name) %} has-error{% endif %}">
+  <label class="check">
+    <input type="checkbox" name="{{ name }}" id="f-{{ name }}"{% if checked %} checked{% endif %}
+      {%- if errors.get(name) %} aria-invalid="true"{% endif %}
+      {{- _describedby(name, hint, errors) }}>
+    <span>{{ label }}</span>
+  </label>
+  {% if hint %}<p class="hint" id="h-{{ name }}">{{ hint }}</p>{% endif %}
+  {% if errors.get(name) %}<p class="error-text" id="e-{{ name }}" role="alert">{{ errors[name] }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro badge(value) -%}
+<span class="badge badge-{{ value }}">{{ value|label }}</span>
+{%- endmacro %}
+
+{% macro blood_badge(group) -%}
+<span class="blood-badge" title="Blood group {{ group }}">{{ group }}</span>
+{%- endmacro %}
+
+{% macro post_button(action, text, css='btn btn-secondary', confirm=none, fields=none) -%}
+<form method="post" action="{{ action }}" class="inline-form">
+  {{ csrf() }}
+  {% if fields %}{% for key, value in fields.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}{% endif %}
+  <button type="submit" class="{{ css }}"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>{{ text }}</button>
+</form>
+{%- endmacro %}
+
+{% macro empty_state(title, text, icon_name='droplet', action_text=none, action_url=none) -%}
+<div class="empty-state">
+  <span class="empty-icon">{{ icon(icon_name, 28) }}</span>
+  <h3>{{ title }}</h3>
+  <p>{{ text }}</p>
+  {% if action_text and action_url %}<a class="btn btn-primary" href="{{ action_url }}">{{ action_text }}</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro stat_card(label, value, icon_name='droplet', href=none) -%}
+<div class="stat-card">
+  <span class="stat-icon">{{ icon(icon_name, 20) }}</span>
+  <div>
+    <p class="stat-value">{{ value }}</p>
+    <p class="stat-label">{% if href %}<a href="{{ href }}">{{ label }}</a>{% else %}{{ label }}{% endif %}</p>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro page_nav(pg) -%}
+{% if pg.pages > 1 %}
+<nav class="pagination" aria-label="Pagination">
+  {% if pg.has_prev %}<a class="page-link" href="{{ page_url(pg.prev_num) }}" rel="prev">Previous</a>{% else %}<span class="page-link is-disabled" aria-disabled="true">Previous</span>{% endif %}
+  <ul>
+    {% for p in pg.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if p %}
+        <li>{% if p == pg.page %}<span class="page-link is-current" aria-current="page">{{ p }}</span>{% else %}<a class="page-link" href="{{ page_url(p) }}">{{ p }}</a>{% endif %}</li>
+      {% else %}
+        <li><span class="page-gap" aria-hidden="true">…</span></li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  {% if pg.has_next %}<a class="page-link" href="{{ page_url(pg.next_num) }}" rel="next">Next</a>{% else %}<span class="page-link is-disabled" aria-disabled="true">Next</span>{% endif %}
+</nav>
+<p class="results-note">Page {{ pg.page }} of {{ pg.pages }} · {{ pg.total }} total</p>
+{% endif %}
+{%- endmacro %}
