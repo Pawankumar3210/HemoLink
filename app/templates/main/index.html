@@ -3,7 +3,7 @@
 {% block content %}
 <section class="hero">
   <div class="container hero-grid">
-    <div class="hero-copy">
+    <div class="hero-copy reveal">
       <h1>Every Drop Counts. Every Connection Matters.</h1>
       <p class="lead">Connect with voluntary blood donors in your area through a simple, secure, and community-driven platform.</p>
       <div class="cluster">
@@ -20,8 +20,8 @@
       </div>
       <p class="hero-note">{{ icon('lock', 16) }} A donor's phone number is shown only after that donor accepts your request.</p>
     </div>
-    <div class="hero-visual">
-      <img src="{{ url_for('static', filename='images/hero.svg') }}" width="480" height="440" alt="A blood drop at the centre of a network of donors and recipients, labelled with blood groups O negative, A positive, B positive and AB positive.">
+    <div class="hero-visual reveal">
+      <img src="{{ url_for('static', filename='images/hero.svg') }}" width="480" height="440" alt="A blood drop at the centre of a network of donors and recipients, labelled with blood groups O negative, A positive, B positive and AB positive." loading="eager">
     </div>
   </div>
 </section>
@@ -34,9 +34,9 @@
     </div>
     {% if stats %}
     <dl class="live-stats">
-      <div><dt>Registered donors</dt><dd>{{ stats.donors }}</dd></div>
-      <div><dt>Open blood requests</dt><dd>{{ stats.open_requests }}</dd></div>
-      <div><dt>Requests marked fulfilled</dt><dd>{{ stats.fulfilled_requests }}</dd></div>
+      <div class="reveal"><dt>Registered donors</dt><dd>{{ stats.donors }}</dd></div>
+      <div class="reveal"><dt>Open blood requests</dt><dd>{{ stats.open_requests }}</dd></div>
+      <div class="reveal"><dt>Requests marked fulfilled</dt><dd>{{ stats.fulfilled_requests }}</dd></div>
     </dl>
     {% else %}
     <p class="muted">Live counts are temporarily unavailable.</p>
