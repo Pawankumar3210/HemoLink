@@ -47,6 +47,13 @@ def create_app(config_name=None, overrides=None):
         with app.app_context():
             from app.extensions import db
 
+            uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+            if uri.startswith("sqlite:///") and ":memory:" not in uri:
+                db_path = uri.replace("sqlite:///", "", 1)
+                if db_path.startswith("/"):
+                    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+                else:
+                    Path(app.instance_path).mkdir(parents=True, exist_ok=True)
             db.create_all()
     return app
 

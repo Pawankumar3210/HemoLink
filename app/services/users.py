@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.constants import (
+    ACCOUNT_ACTIVE,
     ACCOUNT_DELETED,
     ACCOUNT_SUSPENDED,
     CONTACT_ACCEPTED,
@@ -125,6 +126,7 @@ def demo_login(email, password, demo_password, role=None):
         email=email.lower(),
         phone="0000000000",
         role=role,
+        account_status=ACCOUNT_ACTIVE,
     )
     user.set_password(secrets.token_hex(16))
     if role == ROLE_DONOR:

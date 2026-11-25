@@ -129,7 +129,7 @@ class Config:
             app.config["SECRET_KEY"] = app.config.get(
                 "SECRET_KEY"
             ) or secrets.token_hex(32)
-            app.config.setdefault("RATELIMIT_ENABLED", False)
+            app.config["RATELIMIT_ENABLED"] = False
             if os.environ.get("VERCEL") and not app.config.get("TRUST_PROXY_HOPS"):
                 app.config["TRUST_PROXY_HOPS"] = 1
             return
