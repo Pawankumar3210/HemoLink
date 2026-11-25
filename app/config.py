@@ -168,8 +168,8 @@ class ProductionConfig(Config):
                 'characters in production (python -c "import secrets; '
                 'print(secrets.token_hex(32))").'
             )
-        if os.environ.get("VERCEL"):
-            app.config.setdefault("TRUST_PROXY_HOPS", 1)
+        if os.environ.get("VERCEL") and not app.config.get("TRUST_PROXY_HOPS"):
+            app.config["TRUST_PROXY_HOPS"] = 1
 
 
 CONFIGS = {
