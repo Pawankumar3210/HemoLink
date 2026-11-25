@@ -4,7 +4,7 @@
 {% block page_title %}{{ 'Edit blood request' if editing else 'New blood request' }}{% endblock %}
 {% block page_sub %}<p class="muted">Share only what donors need. Please do not include patient names or medical record numbers.</p>{% endblock %}
 {% block content %}
-<section class="card card-form">
+<section class="card reveal card-form">
   <form method="post" class="form" data-loading-form>
     {{ csrf() }}
     {{ form_alert(errors) }}

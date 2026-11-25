@@ -5,7 +5,7 @@
 {% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('donors.detail', profile_id=profile.id) }}">Back to profile</a>{% endblock %}
 {% block content %}
 <div class="grid grid-2">
-  <section class="card card-form">
+  <section class="card reveal card-form">
     <form method="post" class="form" data-loading-form>
       {{ csrf() }}
       {{ form_alert(errors) }}
@@ -24,7 +24,7 @@
       <button class="btn btn-primary" type="submit" data-loading-text="Sending…">Send request</button>
     </form>
   </section>
-  <section class="card" aria-labelledby="who-title">
+  <section class="card reveal" aria-labelledby="who-title">
     <h2 id="who-title" class="card-title">Donor</h2>
     <div class="profile-summary"><span class="avatar avatar-lg" aria-hidden="true">{{ profile.user.full_name|initials }}</span><div><p><strong>{{ profile.user.full_name }}</strong></p><p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p></div>{{ blood_badge(profile.blood_group) }}</div>
     <p>{{ badge(profile.availability_status) }}</p>

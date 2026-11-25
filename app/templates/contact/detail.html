@@ -4,8 +4,8 @@
 {% block page_title %}Contact request{% endblock %}
 {% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('contact.incoming') if as_donor and contact.is_pending else (url_for('contact.history') if as_donor else url_for('contact.tracking')) }}">Back to list</a>{% endblock %}
 {% block content %}
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="cd-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="cd-title">
     <div class="card-header"><h2 id="cd-title" class="card-title">{{ 'Request from ' ~ contact.recipient.full_name if as_donor else 'Request to ' ~ contact.donor.full_name }}</h2>{{ badge(contact.status) }}</div>
     <blockquote class="message-box">{{ contact.message }}</blockquote>
     <dl class="meta-list">
@@ -19,7 +19,7 @@
     </dl>
   </section>
 
-  <section class="card" aria-labelledby="ca-title">
+  <section class="card reveal" aria-labelledby="ca-title">
     {% if as_donor %}
       <h2 id="ca-title" class="card-title">Your decision</h2>
       {% if contact.status == 'pending' %}

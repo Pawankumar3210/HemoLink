@@ -16,7 +16,7 @@
   {{ stat_card('Fulfilled requests', stats.fulfilled_requests, 'heart', url_for('admin.requests', status='fulfilled')) }}
   {{ stat_card('Pending contact requests', stats.pending_contacts, 'inbox', url_for('admin.contacts', status='pending')) }}
 </div>
-<section class="card" aria-labelledby="recent-title">
+<section class="card reveal" aria-labelledby="recent-title">
   <div class="card-header"><h2 id="recent-title" class="card-title">Recent activity</h2><a href="{{ url_for('admin.audit') }}">Full audit log</a></div>
   {% if recent %}
   <ul class="item-list">

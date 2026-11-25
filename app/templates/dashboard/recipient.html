@@ -12,7 +12,7 @@
   {{ stat_card('Donors who accepted', stats.accepted_contacts, 'users', url_for('contact.tracking')) }}
 </div>
 
-<section class="card" aria-labelledby="quick-title">
+<section class="card reveal" aria-labelledby="quick-title">
   <h2 id="quick-title" class="card-title">Find a donor</h2>
   <form method="get" action="{{ url_for('donors.search') }}" class="filter-bar">
     <div class="field">
@@ -31,8 +31,8 @@
   </form>
 </section>
 
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="open-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="open-title">
     <div class="card-header"><h2 id="open-title" class="card-title">Your open requests</h2><a href="{{ url_for('blood_requests.index') }}">View all</a></div>
     {% if open_requests %}
     <ul class="item-list">
@@ -47,7 +47,7 @@
     {{ empty_state('No open requests', 'Post a request so donors nearby can see what you need.', 'list', 'Create a request', url_for('blood_requests.create')) }}
     {% endif %}
   </section>
-  <section class="card" aria-labelledby="contacts-title">
+  <section class="card reveal" aria-labelledby="contacts-title">
     <div class="card-header"><h2 id="contacts-title" class="card-title">Recent contact requests</h2><a href="{{ url_for('contact.tracking') }}">View all</a></div>
     {% if contact_requests %}
     <ul class="item-list">
@@ -64,7 +64,7 @@
   </section>
 </div>
 
-<section class="card" aria-labelledby="rn-title">
+<section class="card reveal" aria-labelledby="rn-title">
   <div class="card-header"><h2 id="rn-title" class="card-title">Recent notifications</h2><a href="{{ url_for('notifications.index') }}">View all</a></div>
   {% if notifications %}
   <ul class="item-list">

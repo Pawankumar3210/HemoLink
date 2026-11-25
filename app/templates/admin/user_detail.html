@@ -4,8 +4,8 @@
 {% block page_title %}{{ user.full_name }}{% endblock %}
 {% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('admin.users') }}">Back to users</a>{% endblock %}
 {% block content %}
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="ud-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="ud-title">
     <h2 id="ud-title" class="card-title">Account</h2>
     <dl class="meta-list">
       <div><dt>Role</dt><dd>{{ user.role|label }}</dd></div>
@@ -24,7 +24,7 @@
     {% endif %}
   </section>
   {% if user.donor_profile %}
-  <section class="card" aria-labelledby="dp-title">
+  <section class="card reveal" aria-labelledby="dp-title">
     <h2 id="dp-title" class="card-title">Donor profile</h2>
     <dl class="meta-list">
       <div><dt>Blood group</dt><dd>{{ blood_badge(user.donor_profile.blood_group) }}</dd></div>

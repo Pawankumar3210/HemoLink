@@ -6,7 +6,7 @@
 {% block content %}
 {% if profile %}
 <div class="grid grid-2">
-  <section class="card" aria-labelledby="pd-title">
+  <section class="card reveal" aria-labelledby="pd-title">
     <h2 id="pd-title" class="card-title">Profile details</h2>
     <div class="profile-summary">{{ blood_badge(profile.blood_group) }}<div><p><strong>{{ current_user.full_name }}</strong></p><p class="muted">{{ icon('pin', 14) }} {{ profile.city }}, {{ profile.state }}</p></div></div>
     <dl class="meta-list">
@@ -19,7 +19,7 @@
       <div><dt>Last updated</dt><dd>{{ profile.updated_at|fmt_date }}</dd></div>
     </dl>
   </section>
-  <section class="card" aria-labelledby="priv-title">
+  <section class="card reveal" aria-labelledby="priv-title">
     <h2 id="priv-title" class="card-title">What others can see</h2>
     <dl class="meta-list">
       <div><dt>Availability</dt><dd>{{ badge(profile.availability_status) }}</dd></div>

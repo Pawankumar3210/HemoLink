@@ -4,7 +4,7 @@
 {% block page_title %}Find donors{% endblock %}
 {% block page_sub %}<p class="muted">Search matches the exact blood group you choose. A hospital or doctor can tell you which groups are compatible.</p>{% endblock %}
 {% block content %}
-<section class="card" aria-label="Search filters">
+<section class="card reveal" aria-label="Search filters">
   <form method="get" action="{{ url_for('donors.search') }}" class="filter-form" data-search-form>
     <div class="filter-grid">
        <div class="field{% if errors.get('blood_group') %} has-error{% endif %}">
@@ -49,7 +49,7 @@
   </form>
 </section>
 
-<section aria-labelledby="results-title" aria-live="polite" data-results>
+<section class="reveal" aria-labelledby="results-title" aria-live="polite" data-results>
   <h2 id="results-title" class="results-title">{{ pagination.total }} donor{{ '' if pagination.total == 1 else 's' }} found</h2>
   {% if pagination.items %}
   <div class="donor-grid">

@@ -4,8 +4,8 @@
 {% block page_title %}Donor profile{% endblock %}
 {% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('donors.search') }}">Back to search</a>{% endblock %}
 {% block content %}
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="dd-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="dd-title">
     <div class="profile-summary profile-summary-lg">
       <span class="avatar avatar-xl" aria-hidden="true">{{ profile.user.full_name|initials }}</span>
       <div>
@@ -21,7 +21,7 @@
       <div><dt>Member since</dt><dd>{{ profile.created_at|fmt_date }}</dd></div>
     </dl>
   </section>
-  <section class="card" aria-labelledby="cc-title">
+  <section class="card reveal" aria-labelledby="cc-title">
     <h2 id="cc-title" class="card-title">Contact this donor</h2>
     <p>Contact details are private. Send a short request, and the donor will decide whether to share their phone number with you.</p>
     {% if existing and existing.status == 'pending' %}

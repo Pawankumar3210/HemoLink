@@ -5,7 +5,7 @@
 {% block page_sub %}<p class="muted">Tell recipients whether you can help right now. This is your own choice and is not a medical check.</p>{% endblock %}
 {% block content %}
 {% if profile %}
-<section class="card card-form">
+<section class="card reveal card-form">
   <form method="post" class="form" data-loading-form>
     {{ csrf() }}
     {{ form_alert(errors) }}

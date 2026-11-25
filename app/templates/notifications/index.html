@@ -5,7 +5,7 @@
 {% block page_actions %}{% if pagination.items %}{{ post_button(url_for('notifications.mark_all_read'), 'Mark all as read', 'btn btn-secondary') }}{% endif %}{% endblock %}
 {% block content %}
 {% if pagination.items %}
-<ul class="notice-list">
+<ul class="notice-list reveal">
   {% for n in pagination.items %}
   <li class="notice{% if not n.is_read %} is-unread{% endif %}">
     <div class="notice-body">

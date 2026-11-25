@@ -6,3 +6,5 @@
   .sidebar { position: static; width: auto; max-width: none; height: auto; transform: none; box-shadow: none; }
   .app-topbar { display: none; }
 }
+.reveal { opacity: 1 !important; transform: none !important; }
+main, .app-shell { animation: none !important; }

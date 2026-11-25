@@ -14,8 +14,8 @@
   {{ stat_card('Unread notifications', unread_count(), 'bell', url_for('notifications.index')) }}
 </div>
 
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="avail-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="avail-title">
     <h2 id="avail-title" class="card-title">Your availability</h2>
     {% if profile %}
     <p class="current-status">{{ badge(profile.availability_status) }} {% if profile.visible_in_search %}<span class="muted">Visible in search</span>{% else %}<span class="muted">Hidden from search</span>{% endif %}</p>
@@ -33,7 +33,7 @@
     {% endif %}
   </section>
 
-  <section class="card" aria-labelledby="profile-title">
+  <section class="card reveal" aria-labelledby="profile-title">
     <h2 id="profile-title" class="card-title">Your profile</h2>
     {% if profile %}
     <div class="profile-summary">
@@ -49,7 +49,7 @@
   </section>
 </div>
 
-<section class="card" aria-labelledby="pending-title">
+<section class="card reveal" aria-labelledby="pending-title">
   <div class="card-header"><h2 id="pending-title" class="card-title">Contact requests waiting for you</h2><a href="{{ url_for('contact.incoming') }}">View all</a></div>
   {% if pending %}
   <ul class="item-list">
@@ -68,7 +68,7 @@
   {% endif %}
 </section>
 
-<section class="card" aria-labelledby="notes-title">
+<section class="card reveal" aria-labelledby="notes-title">
   <div class="card-header"><h2 id="notes-title" class="card-title">Recent notifications</h2><a href="{{ url_for('notifications.index') }}">View all</a></div>
   {% if notifications %}
   <ul class="item-list">

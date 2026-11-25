@@ -14,7 +14,7 @@
 {% if blood_request.status == 'rejected' and blood_request.moderation_note and is_owner %}
 <div class="alert alert-error" role="note">{{ icon('alert', 18) }}<p>An administrator rejected this request. Reason: {{ blood_request.moderation_note }}</p></div>
 {% endif %}
-<section class="card" aria-labelledby="req-title">
+<section class="card reveal" aria-labelledby="req-title">
   <div class="profile-summary profile-summary-lg">
     {{ blood_badge(blood_request.blood_group) }}
     <div>
@@ -36,7 +36,7 @@
 </section>
 
 {% if is_owner %}
-<section class="card" aria-labelledby="act-title">
+<section class="card reveal" aria-labelledby="act-title">
   <div class="card-header"><h2 id="act-title" class="card-title">Donor contact activity</h2><a href="{{ url_for('donors.search', blood_group=blood_request.blood_group, state=blood_request.state) }}">Find more donors</a></div>
   {% if activity %}
   <ul class="item-list">

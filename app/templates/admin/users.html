@@ -3,7 +3,7 @@
 {% block title %}Users · HemoLink admin{% endblock %}
 {% block page_title %}Users{% endblock %}
 {% block content %}
-<section class="card" aria-label="Filters">
+<section class="card reveal" aria-label="Filters">
   <form method="get" class="filter-bar">
     <div class="field"><label for="u-q">Name or email</label><input id="u-q" name="q" type="search" maxlength="100" value="{{ filters.q }}"></div>
     <div class="field"><label for="u-role">Role</label><select id="u-role" name="role"><option value="">Any</option>{% for r in ['donor', 'recipient', 'admin'] %}<option value="{{ r }}"{% if filters.role == r %} selected{% endif %}>{{ r|label }}</option>{% endfor %}</select></div>

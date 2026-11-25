@@ -4,7 +4,7 @@
 {% block page_title %}Audit log{% endblock %}
 {% block page_sub %}<p class="muted">Administrative and security-relevant actions. Entries never include passwords or tokens.</p>{% endblock %}
 {% block content %}
-<section class="card" aria-label="Filter">
+<section class="card reveal" aria-label="Filter">
   <form method="get" class="filter-bar">
     <div class="field"><label for="a-action">Action starts with</label><input id="a-action" name="action" type="text" maxlength="40" value="{{ filters.action }}" placeholder="e.g. user. or request."></div>
     <button class="btn btn-primary" type="submit">Filter</button>

@@ -4,8 +4,8 @@
 {% block page_title %}System information{% endblock %}
 {% block page_sub %}<p class="muted">Runtime facts for troubleshooting. No secrets are shown.</p>{% endblock %}
 {% block content %}
-<div class="grid grid-2">
-  <section class="card" aria-labelledby="rt-title">
+<div class="grid reveal grid-2">
+  <section class="card reveal" aria-labelledby="rt-title">
     <h2 id="rt-title" class="card-title">Runtime</h2>
     <dl class="meta-list">
       <div><dt>Application version</dt><dd>{{ info.app_version }}</dd></div>
@@ -18,7 +18,7 @@
       <div><dt>Email delivery</dt><dd>{{ info.mail }}</dd></div>
     </dl>
   </section>
-  <section class="card" aria-labelledby="db-title">
+  <section class="card reveal" aria-labelledby="db-title">
     <h2 id="db-title" class="card-title">Database</h2>
     <dl class="meta-list">
       <div><dt>Status</dt><dd>{{ info.database.status|capitalize }}</dd></div>
