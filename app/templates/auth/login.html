@@ -4,9 +4,7 @@
 {% block auth_content %}
 <h1>Welcome back</h1>
 <p class="muted">Log in to manage your profile, requests and contact messages.</p>
-{% if demo_login %}
-<div class="alert alert-info" role="note"><p>Demo mode: use any email and password <strong>{{ demo_password }}</strong>. A demo account is created automatically on first login.</p></div>
-{% endif %}
+
 <form method="post" class="form" data-loading-form>
   {{ csrf() }}
   <input type="hidden" name="next" value="{{ next_url }}">

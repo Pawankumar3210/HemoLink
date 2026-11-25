@@ -116,9 +116,7 @@ class Config:
     def finalize(cls, app):
         """Hook for per-environment validation once the app config is final."""
         if app.config.get("ALLOW_DEMO_LOGIN"):
-            db_url = os.environ.get("DATABASE_URL") or os.environ.get(
-                "DEMO_DATABASE_URL"
-            )
+            db_url = (os.environ.get("DEMO_DATABASE_URL") or "").strip()
             if not db_url:
                 if os.environ.get("VERCEL") or os.environ.get("SERVERLESS"):
                     db_url = "sqlite:////tmp/hemolink-demo.db"
