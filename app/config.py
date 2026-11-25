@@ -106,12 +106,30 @@ class Config:
     )[:12]
 
     ALLOW_DEMO_SEED = env_bool("ALLOW_DEMO_SEED", False)
+    ALLOW_DEMO_LOGIN = env_bool("ALLOW_DEMO_LOGIN", False)
+    DEMO_LOGIN_PASSWORD = os.environ.get("DEMO_LOGIN_PASSWORD", "")
     SEARCH_PAGE_SIZE = 9
     TABLE_PAGE_SIZE = 15
 
     @classmethod
     def finalize(cls, app):
         """Hook for per-environment validation once the app config is final."""
+        if app.config.get("ALLOW_DEMO_LOGIN"):
+            db_url = os.environ.get("DATABASE_URL") or os.environ.get(
+                "DEMO_DATABASE_URL"
+            )
+            if not db_url and os.environ.get("VERCEL"):
+                db_url = "sqlite:////tmp/hemolink-demo.db"
+            app.config["SQLALCHEMY_DATABASE_URI"] = normalize_database_url(
+                db_url or "sqlite:///instance/hemolink-demo.db"
+            )
+            app.config["SECRET_KEY"] = app.config.get(
+                "SECRET_KEY"
+            ) or secrets.token_hex(32)
+            app.config.setdefault("RATELIMIT_ENABLED", False)
+            if os.environ.get("VERCEL") and not app.config.get("TRUST_PROXY_HOPS"):
+                app.config["TRUST_PROXY_HOPS"] = 1
+            return
         if not app.config.get("SQLALCHEMY_DATABASE_URI"):
             raise RuntimeError(
                 "DATABASE_URL is not set. Copy .env.example to .env and set it, "
@@ -147,6 +165,7 @@ class TestingConfig(Config):
     SERVER_NAME = None
     MAIL_SERVER = ""
     ALLOW_DEMO_SEED = True
+    ALLOW_DEMO_LOGIN = False
 
 
 class ProductionConfig(Config):

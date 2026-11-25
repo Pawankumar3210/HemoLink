@@ -27,6 +27,7 @@ from app.utils.ratelimit import rate_limit
 from app.utils.security import is_safe_redirect_target
 
 INVALID_LOGIN = "Invalid email or password."
+DEMO_LOGIN_PASSWORD = "demo1234"
 
 
 def _can_view_outbox():
@@ -53,11 +54,22 @@ def login():
         if errors:
             flash(INVALID_LOGIN, "error")
         else:
-            user, state = users.authenticate(cleaned["email"], cleaned["password"])
+            demo_state = None
+            if current_app.config.get("ALLOW_DEMO_LOGIN"):
+                user, demo_state = users.demo_login(
+                    cleaned["email"],
+                    cleaned["password"],
+                    current_app.config.get("DEMO_LOGIN_PASSWORD")
+                    or DEMO_LOGIN_PASSWORD,
+                )
+                state = "ok" if user else "invalid"
+            else:
+                user, state = users.authenticate(cleaned["email"], cleaned["password"])
             if state == "ok":
                 login_user(user)
                 session.permanent = True
-                users.record_login(user)
+                if demo_state != "demo":
+                    users.record_login(user)
                 target = request.args.get("next") or request.form.get("next")
                 if is_safe_redirect_target(target):
                     return redirect(target)
@@ -75,6 +87,9 @@ def login():
             form=request.form,
             errors={},
             next_url=request.args.get("next", ""),
+            demo_login=current_app.config.get("ALLOW_DEMO_LOGIN"),
+            demo_password=current_app.config.get("DEMO_LOGIN_PASSWORD")
+            or DEMO_LOGIN_PASSWORD,
         ),
         200,
     )

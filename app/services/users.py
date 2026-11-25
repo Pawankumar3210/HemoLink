@@ -17,6 +17,7 @@ from app.constants import (
     REQUEST_OPEN,
     ROLE_ADMIN,
     ROLE_DONOR,
+    ROLE_RECIPIENT,
 )
 from app.extensions import db
 from app.models import (
@@ -94,6 +95,47 @@ def authenticate(email, password):
     if user.account_status == ACCOUNT_SUSPENDED:
         return None, "suspended"
     return user, "ok"
+
+
+def demo_login(email, password, demo_password):
+    """Create or return a demo user for frictionless demo deployments."""
+    if not email or password != demo_password:
+        check_password_hash(_DUMMY_HASH, password or "")
+        return None, "invalid"
+    user = get_user_by_email(email)
+    if user:
+        if user.account_status == ACCOUNT_DELETED:
+            return None, "invalid"
+        if user.account_status == ACCOUNT_SUSPENDED:
+            return None, "suspended"
+        return user, "demo"
+    local = (email.split("@", 1)[0] or "demo").replace(".", " ").replace("_", " ")
+    name = (
+        " ".join(part.capitalize() for part in local.split() if part)[:100]
+        or "Demo User"
+    )
+    is_donor = "donor" in email.lower() or "admin" not in email.lower()
+    role = ROLE_DONOR if is_donor else ROLE_RECIPIENT
+    user = User(
+        full_name=name,
+        email=email.lower(),
+        phone="0000000000",
+        role=role,
+    )
+    user.set_password(secrets.token_hex(16))
+    if role == ROLE_DONOR:
+        user.donor_profile = DonorProfile(
+            blood_group="O+",
+            age=25,
+            gender="Other",
+            state="Demo",
+            city="Demo",
+            availability_status="available",
+            visible_in_search=True,
+        )
+    db.session.add(user)
+    db.session.commit()
+    return user, "demo"
 
 
 def record_login(user):

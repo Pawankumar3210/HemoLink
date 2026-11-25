@@ -43,6 +43,11 @@ def create_app(config_name=None, overrides=None):
     register_hooks(app)
     register_template_helpers(app)
     register_cli(app)
+    if app.config.get("ALLOW_DEMO_LOGIN"):
+        with app.app_context():
+            from app.extensions import db
+
+            db.create_all()
     return app
 
 
