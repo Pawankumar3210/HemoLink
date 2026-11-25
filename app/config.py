@@ -41,7 +41,21 @@ def normalize_database_url(url):
 def engine_options():
     """SQLAlchemy engine options. ``DB_SSL_CA`` enables TLS for managed databases."""
     options = {"pool_pre_ping": True, "pool_recycle": 280}
+    if os.environ.get("VERCEL") or os.environ.get("SERVERLESS"):
+        from sqlalchemy.pool import NullPool
+
+        options["poolclass"] = NullPool
+        options.pop("pool_recycle", None)
     ca_path = os.environ.get("DB_SSL_CA", "").strip()
+    if not ca_path and os.environ.get("VERCEL"):
+        for candidate in (
+            "/etc/ssl/certs/ca-certificates.crt",
+            "/etc/pki/tls/certs/ca-bundle.crt",
+            "/etc/ssl/cert.pem",
+        ):
+            if os.path.exists(candidate):
+                ca_path = candidate
+                break
     if ca_path:
         options["connect_args"] = {"ssl": {"ca": ca_path}}
     return options
@@ -154,6 +168,8 @@ class ProductionConfig(Config):
                 'characters in production (python -c "import secrets; '
                 'print(secrets.token_hex(32))").'
             )
+        if os.environ.get("VERCEL"):
+            app.config.setdefault("TRUST_PROXY_HOPS", 1)
 
 
 CONFIGS = {
