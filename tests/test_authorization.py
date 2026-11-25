@@ -13,7 +13,12 @@ from tests.helpers import (
     profile_id,
 )
 
-DONOR_ONLY = ["/dashboard/donor", "/donor/profile", "/donor/availability", "/contact/incoming"]
+DONOR_ONLY = [
+    "/dashboard/donor",
+    "/donor/profile",
+    "/donor/availability",
+    "/contact/incoming",
+]
 RECIPIENT_ONLY = [
     "/dashboard/recipient",
     "/donors/search",

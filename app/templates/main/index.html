@@ -7,8 +7,16 @@
       <h1>Every Drop Counts. Every Connection Matters.</h1>
       <p class="lead">Connect with voluntary blood donors in your area through a simple, secure, and community-driven platform.</p>
       <div class="cluster">
+        {% if current_user.is_authenticated and current_user.role == 'donor' %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard.home') }}">Go to your dashboard</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('donors.profile') }}">Manage your donor profile</a>
+        {% elif current_user.is_authenticated and current_user.role == 'admin' %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('admin.index') }}">Open admin console</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('main.about') }}">About HemoLink</a>
+        {% else %}
         <a class="btn btn-primary btn-lg" href="{{ url_for('donors.search') }}">Find Blood Donors</a>
         <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.register_donor') }}">Become a Donor</a>
+        {% endif %}
       </div>
       <p class="hero-note">{{ icon('lock', 16) }} A donor's phone number is shown only after that donor accepts your request.</p>
     </div>

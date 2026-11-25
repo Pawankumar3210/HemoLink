@@ -38,9 +38,7 @@ class User(UserMixin, db.Model):
         db.String(20), nullable=False, default=ACCOUNT_ACTIVE, server_default="active"
     )
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
     last_login_at = db.Column(db.DateTime, nullable=True)
 
     donor_profile = db.relationship(

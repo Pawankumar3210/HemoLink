@@ -2,7 +2,7 @@
 {% from "partials/_macros.html" import icon, badge, blood_badge, post_button %}
 {% block title %}Contact request · HemoLink{% endblock %}
 {% block page_title %}Contact request{% endblock %}
-{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('contact.incoming') if as_donor else url_for('contact.tracking') }}">Back to list</a>{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost" href="{{ url_for('contact.incoming') if as_donor and contact.is_pending else (url_for('contact.history') if as_donor else url_for('contact.tracking')) }}">Back to list</a>{% endblock %}
 {% block content %}
 <div class="grid grid-2">
   <section class="card" aria-labelledby="cd-title">
@@ -49,8 +49,10 @@
       {% elif contact.status == 'pending' %}
         <div class="alert alert-info" role="status">{{ icon('clock', 18) }}<p>Waiting for the donor to reply. Their phone number stays hidden until they accept.</p></div>
         {{ post_button(url_for('contact.withdraw', contact_id=contact.id), 'Withdraw request', 'btn btn-secondary', 'Withdraw this contact request?') }}
-      {% elif contact.status == 'accepted' %}
+      {% elif contact.status == 'accepted' and contact.access_revoked %}
         <div class="alert alert-info" role="note">{{ icon('lock', 18) }}<p>The donor has ended access to their contact details.</p></div>
+      {% elif contact.status == 'accepted' %}
+        <div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>The donor's account is currently unavailable, so their contact details are hidden.</p></div>
       {% elif contact.status == 'declined' %}
         <div class="alert alert-info" role="note">{{ icon('info', 18) }}<p>The donor declined. Their details stay private. You can <a href="{{ url_for('donors.search') }}">search for other donors</a>.</p></div>
       {% else %}

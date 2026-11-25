@@ -13,7 +13,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.auth import bp
-from app.constants import ROLE_DONOR, ROLE_RECIPIENT
+from app.constants import ROLE_ADMIN, ROLE_DONOR, ROLE_RECIPIENT
 from app.services import password_reset, users
 from app.services.errors import ServiceError
 from app.services.mailer import delivery_available, get_outbox, smtp_configured
@@ -27,6 +27,18 @@ from app.utils.ratelimit import rate_limit
 from app.utils.security import is_safe_redirect_target
 
 INVALID_LOGIN = "Invalid email or password."
+
+
+def _can_view_outbox():
+    """Console mail links are for local development admins only, never the public."""
+    config = current_app.config
+    return (
+        config.get("ALLOW_CONSOLE_MAIL")
+        and not smtp_configured()
+        and (current_app.debug or config.get("APP_ENV") == "testing")
+        and current_user.is_authenticated
+        and current_user.role == ROLE_ADMIN
+    )
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -152,7 +164,7 @@ def forgot_password():
         form=request.form,
         errors=errors,
         available=available,
-        dev_console=available and not smtp_configured(),
+        dev_console=_can_view_outbox(),
     )
 
 
@@ -184,8 +196,7 @@ def reset_password(token):
 @bp.route("/dev/outbox")
 def dev_outbox():
     """Development-only view of emails the console mail backend captured."""
-    config = current_app.config
-    if not config.get("ALLOW_CONSOLE_MAIL") or smtp_configured():
+    if not _can_view_outbox():
         abort(404)
     messages = list(reversed(get_outbox()))
     return render_template("auth/dev_outbox.html", messages=messages)

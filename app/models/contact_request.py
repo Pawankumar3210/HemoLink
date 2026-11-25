@@ -45,9 +45,7 @@ class ContactRequest(db.Model):
     recipient_access_revoked_at = db.Column(db.DateTime, nullable=True)
     responded_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     donor = db.relationship("User", foreign_keys=[donor_id])
     recipient = db.relationship("User", foreign_keys=[recipient_id])

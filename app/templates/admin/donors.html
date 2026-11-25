@@ -28,7 +28,7 @@
         <td data-label="Availability">{{ badge(p.availability_status) }}</td>
         <td data-label="In search">{{ 'Yes' if p.visible_in_search else 'No' }}</td>
         <td data-label="Account">{{ badge(p.user.account_status) }}</td>
-        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('admin.user_detail', user_id=p.user_id) }}">View</a></td>
+        <td data-label="Actions"><a class="btn btn-secondary btn-sm" href="{{ url_for('admin.user_detail', user_id=p.user_id) }}">View</a></td>
       </tr>
       {% endfor %}
     </tbody>

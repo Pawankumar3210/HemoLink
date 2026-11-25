@@ -26,13 +26,24 @@ def make_recipient_client(app):
 def seed_donors(app):
     ids = {}
     ids["o_blr"] = create_user(app, "donor", name="Oscar Blr", blood_group="O+")
-    ids["o_mys"] = create_user(app, "donor", name="Olive Mys", blood_group="O+", city="Mysuru")
+    ids["o_mys"] = create_user(
+        app, "donor", name="Olive Mys", blood_group="O+", city="Mysuru"
+    )
     ids["a_blr"] = create_user(app, "donor", name="Amit Blr", blood_group="A-")
     ids["b_pune"] = create_user(
-        app, "donor", name="Bela Pune", blood_group="B+", state="Maharashtra", city="Pune"
+        app,
+        "donor",
+        name="Bela Pune",
+        blood_group="B+",
+        state="Maharashtra",
+        city="Pune",
     )
     ids["o_temp"] = create_user(
-        app, "donor", name="Omar Temp", blood_group="O+", availability="temporarily_unavailable"
+        app,
+        "donor",
+        name="Omar Temp",
+        blood_group="O+",
+        availability="temporarily_unavailable",
     )
     return ids
 
@@ -111,7 +122,9 @@ def test_hidden_donors_never_appear(app):
 
 
 def test_hidden_donor_with_available_status_is_still_hidden(app):
-    create_user(app, "donor", name="Hidden Hana", visible=False, availability="available")
+    create_user(
+        app, "donor", name="Hidden Hana", visible=False, availability="available"
+    )
     client = make_recipient_client(app)
     assert b"Hidden Hana" not in client.get("/donors/search").data
 
@@ -141,10 +154,18 @@ def test_results_never_expose_contact_details(app):
 
 def test_last_donation_date_only_shown_when_shared(app):
     create_user(
-        app, "donor", name="Sharing Sia", last_donation_date=date(2026, 3, 4), share_date=True
+        app,
+        "donor",
+        name="Sharing Sia",
+        last_donation_date=date(2026, 3, 4),
+        share_date=True,
     )
     create_user(
-        app, "donor", name="Secret Sid", last_donation_date=date(2026, 5, 6), share_date=False
+        app,
+        "donor",
+        name="Secret Sid",
+        last_donation_date=date(2026, 5, 6),
+        share_date=False,
     )
     client = make_recipient_client(app)
     text = names(client.get("/donors/search"))

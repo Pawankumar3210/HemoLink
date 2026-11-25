@@ -99,4 +99,3 @@ def register_cli(app):
     def purge_reset_tokens():
         """Delete expired or used password-reset tokens."""
         click.echo("Removed %d tokens." % password_reset.purge_expired())
-

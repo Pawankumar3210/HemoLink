@@ -57,9 +57,7 @@ class BloodRequest(db.Model):
     moderation_note = db.Column(db.String(200), nullable=True)
     status_changed_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     requester = db.relationship("User")
 

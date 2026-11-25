@@ -3,8 +3,8 @@
 import platform
 import sys
 import time
+from importlib.metadata import version
 
-import flask
 from flask import current_app
 from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import selectinload
@@ -172,36 +172,40 @@ def broadcast_notice(admin, cleaned):
 
 def system_info():
     """Non-sensitive runtime information for the admin System page."""
+    dialect = db.engine.dialect.name
     try:
-        dialect = db.engine.dialect.name
         query = "SELECT sqlite_version()" if dialect == "sqlite" else "SELECT VERSION()"
-        version = db.session.execute(text(query)).scalar()
-        database = {"status": "connected", "version": str(version)}
+        db_version = db.session.execute(text(query)).scalar()
+        database = {"status": "connected", "version": str(db_version)}
     except Exception:  # noqa: BLE001 - report any connectivity problem
         db.session.rollback()
         database = {"status": "unreachable", "version": "unknown"}
-    counts = {
-        "Users": db.session.scalar(select(func.count()).select_from(User)),
-        "Donor profiles": db.session.scalar(
-            select(func.count()).select_from(DonorProfile)
-        ),
-        "Blood requests": db.session.scalar(
-            select(func.count()).select_from(BloodRequest)
-        ),
-        "Contact requests": db.session.scalar(
-            select(func.count()).select_from(ContactRequest)
-        ),
-        "Notifications": db.session.scalar(
-            select(func.count()).select_from(Notification)
-        ),
-        "Audit entries": db.session.scalar(select(func.count()).select_from(AuditLog)),
-    }
+        counts = {}
+    else:
+        counts = {
+            "Users": db.session.scalar(select(func.count()).select_from(User)),
+            "Donor profiles": db.session.scalar(
+                select(func.count()).select_from(DonorProfile)
+            ),
+            "Blood requests": db.session.scalar(
+                select(func.count()).select_from(BloodRequest)
+            ),
+            "Contact requests": db.session.scalar(
+                select(func.count()).select_from(ContactRequest)
+            ),
+            "Notifications": db.session.scalar(
+                select(func.count()).select_from(Notification)
+            ),
+            "Audit entries": db.session.scalar(
+                select(func.count()).select_from(AuditLog)
+            ),
+        }
     config = current_app.config
     return {
         "app_version": __version__,
         "environment": config["APP_ENV"],
         "python": platform.python_version(),
-        "flask": flask.__version__,
+        "flask": version("flask"),
         "platform": sys.platform,
         "database": database,
         "dialect": db.engine.dialect.name,

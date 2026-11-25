@@ -93,7 +93,12 @@ def availability():
                 flash("Your availability settings have been saved.", "success")
                 return redirect(url_for("donors.availability"))
         return (
-            render_template("donors/availability.html", profile=profile, errors=errors),
+            render_template(
+                "donors/availability.html",
+                profile=profile,
+                form=request.form,
+                errors=errors,
+            ),
             400,
         )
     return render_template("donors/availability.html", profile=profile, errors=errors)

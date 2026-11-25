@@ -181,14 +181,12 @@ flake8 app tests scripts run.py
 pytest --cov=app --cov-report=term-missing
 ```
 
-Tests run on in-memory SQLite by default. To run them on MySQL, set
-`TEST_DATABASE_URL` (done in `.env.example`); set `TEST_USE_MIGRATIONS=1` to build the
-schema through the Alembic migrations. To force SQLite when `.env` points at MySQL:
-`TEST_DATABASE_URL= pytest` (PowerShell: `$env:TEST_DATABASE_URL=""; pytest`).
-
-> **Run `black .` before your first push.** The code was written to Black style but
-> could not be machine-formatted in the environment that generated it, and the CI
-> `black --check` step will report any differences. See [docs/testing.md](docs/testing.md).
+Tests run on in-memory SQLite by default (`.env.example` leaves `TEST_DATABASE_URL`
+unset). To run them on MySQL, set `TEST_DATABASE_URL` to a database whose name contains
+`test`; set `TEST_USE_MIGRATIONS=1` to build the schema through the Alembic migrations.
+`docker compose run --rm test` does both inside the container. The repository is
+formatted with Black and passes `black --check` in CI. See
+[docs/testing.md](docs/testing.md).
 
 ## 10. Git workflow
 

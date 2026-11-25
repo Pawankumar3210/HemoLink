@@ -3,6 +3,7 @@
 {% block title %}Blood request · HemoLink{% endblock %}
 {% block page_title %}Blood request{% endblock %}
 {% block page_actions %}
+{% if not is_owner %}<a class="btn btn-ghost" href="{{ url_for('donors.open_requests') if current_user.role == 'donor' else url_for('admin.requests') }}">Back to requests</a>{% endif %}
 {% if is_owner and blood_request.is_open %}
   <a class="btn btn-secondary" href="{{ url_for('blood_requests.edit', request_id=blood_request.id) }}">Edit</a>
   {{ post_button(url_for('blood_requests.fulfill', request_id=blood_request.id), 'Mark fulfilled', 'btn btn-primary', 'Mark this request as fulfilled?') }}

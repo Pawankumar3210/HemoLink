@@ -13,6 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app \
     APP_ENV=production \
     PORT=8000
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin hemolink
@@ -32,7 +33,7 @@ ENTRYPOINT ["scripts/entrypoint.sh"]
 FROM runtime AS dev
 USER root
 COPY requirements-dev.txt .
-RUN pip install -r requirements-dev.txt
+RUN pip install -r requirements-dev.txt && chown -R hemolink:hemolink /app
 USER hemolink
 
 # The last stage is the default build target, so make production the default.

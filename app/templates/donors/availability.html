@@ -9,12 +9,19 @@
   <form method="post" class="form" data-loading-form>
     {{ csrf() }}
     {{ form_alert(errors) }}
+    {% if form is defined %}
+      {% set availability_form = form %}
+      {% set visibility_form = form if 'visible_in_search' in form else {'visible_in_search': ''} %}
+    {% else %}
+      {% set availability_form = {'availability_status': profile.availability_status} %}
+      {% set visibility_form = {'visible_in_search': 'on' if profile.visible_in_search else ''} %}
+    {% endif %}
     <fieldset class="fieldset">
       <legend>Your availability</legend>
       <div class="radio-cards">
         {% for value, text in AVAILABILITY_OPTIONS %}
         <label class="radio-card">
-          <input type="radio" name="availability_status" value="{{ value }}"{% if profile.availability_status == value %} checked{% endif %} required>
+          <input type="radio" name="availability_status" value="{{ value }}"{% if availability_form.get('availability_status') == value %} checked{% endif %} required>
           <span><strong>{{ text }}</strong>
             <small>{% if value == 'available' %}Recipients can send you contact requests.{% elif value == 'temporarily_unavailable' %}Use this while you recover or travel. Requests are still possible.{% else %}Recipients cannot send you new contact requests.{% endif %}</small>
           </span>
@@ -23,7 +30,7 @@
       </div>
       {% if errors.get('availability_status') %}<p class="error-text" role="alert">{{ errors['availability_status'] }}</p>{% endif %}
     </fieldset>
-    {{ checkbox_field('visible_in_search', 'Show me in donor search', {'visible_in_search': 'on' if profile.visible_in_search else ''}, errors, hint='If this is off, you will not appear in any search, even when you are available.') }}
+    {{ checkbox_field('visible_in_search', 'Show me in donor search', visibility_form, errors, hint='If this is off, you will not appear in any search, even when you are available.') }}
     <button class="btn btn-primary" type="submit" data-loading-text="Saving…">Save availability</button>
   </form>
 </section>

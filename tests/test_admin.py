@@ -69,7 +69,9 @@ def test_user_filters(app):
 
 def test_donor_listing_filters(app):
     create_user(app, "donor", name="Group A", blood_group="A+")
-    create_user(app, "donor", name="Group O", blood_group="O-", city="Pune", state="Maharashtra")
+    create_user(
+        app, "donor", name="Group O", blood_group="O-", city="Pune", state="Maharashtra"
+    )
     client = admin_client(app)
     page = client.get("/admin/donors", query_string={"blood_group": "O-"}).data
     assert b"Group O" in page and b"Group A" not in page
@@ -108,7 +110,9 @@ def test_suspended_donor_disappears_from_search(app):
 def test_admin_accounts_cannot_be_suspended(app):
     other_admin = create_user(app, "admin")
     admin = admin_client(app)
-    response = admin.post("/admin/users/%d/suspend" % other_admin, follow_redirects=True)
+    response = admin.post(
+        "/admin/users/%d/suspend" % other_admin, follow_redirects=True
+    )
     assert b"cannot be changed" in response.data
     assert fetch(app, User, other_admin).account_status == "active"
 
@@ -210,7 +214,11 @@ def test_broadcast_notice(app):
     admin = admin_client(app)
     response = admin.post(
         "/admin/notices",
-        data={"title": "Maintenance", "message": "Planned downtime tonight.", "audience": "donor"},
+        data={
+            "title": "Maintenance",
+            "message": "Planned downtime tonight.",
+            "audience": "donor",
+        },
     )
     assert response.status_code == 302
     for donor in donors:
@@ -218,7 +226,9 @@ def test_broadcast_notice(app):
     assert not any(n.title == "Maintenance" for n in notifications_for(app, recipient))
     assert count(app, Notification, Notification.title == "Maintenance") == 2
     assert "notice.broadcast" in audit_actions(app)
-    bad = admin.post("/admin/notices", data={"title": "", "message": "x", "audience": "everyone"})
+    bad = admin.post(
+        "/admin/notices", data={"title": "", "message": "x", "audience": "everyone"}
+    )
     assert bad.status_code == 400
 
 

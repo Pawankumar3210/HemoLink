@@ -32,12 +32,38 @@ from app.utils.time import utcnow
 DEMO_DOMAIN = "demo.hemolink.example"
 
 FIRST_NAMES = [
-    "Aarav", "Diya", "Kabir", "Meera", "Rohan", "Isha", "Vikram", "Anaya",
-    "Arjun", "Nisha", "Dev", "Tara", "Rahul", "Sana", "Karan", "Pooja",
-    "Imran", "Lakshmi", "Nikhil", "Zoya", "Suresh", "Anjali", "Faisal", "Riya",
+    "Aarav",
+    "Diya",
+    "Kabir",
+    "Meera",
+    "Rohan",
+    "Isha",
+    "Vikram",
+    "Anaya",
+    "Arjun",
+    "Nisha",
+    "Dev",
+    "Tara",
+    "Rahul",
+    "Sana",
+    "Karan",
+    "Pooja",
+    "Imran",
+    "Lakshmi",
+    "Nikhil",
+    "Zoya",
+    "Suresh",
+    "Anjali",
+    "Faisal",
+    "Riya",
 ]
 LAST_NAMES = [
-    "Demo", "Sample", "Example", "Placeholder", "Testwell", "Fictional",
+    "Demo",
+    "Sample",
+    "Example",
+    "Placeholder",
+    "Testwell",
+    "Fictional",
 ]
 LOCATIONS = [
     ("Karnataka", "Bengaluru"),
@@ -59,9 +85,7 @@ def _phone(index):
 
 def demo_user_ids():
     return list(
-        db.session.scalars(
-            select(User.id).where(User.email.like("%@" + DEMO_DOMAIN))
-        )
+        db.session.scalars(select(User.id).where(User.email.like("%@" + DEMO_DOMAIN)))
     )
 
 
@@ -166,7 +190,7 @@ def seed_demo(password=None):
         (1, 0, CONTACT_ACCEPTED),
         (2, 1, CONTACT_DECLINED),
         (3, 2, CONTACT_PENDING),
-        (4, 3, CONTACT_PENDING),
+        (4, 3, CONTACT_ACCEPTED),
     ]
     for donor_index, recipient_index, status in contact_plans:
         donor = donors[donor_index]

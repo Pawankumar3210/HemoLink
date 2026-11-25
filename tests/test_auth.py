@@ -70,7 +70,9 @@ def test_duplicate_email_rejected(app, client):
 def test_invalid_email_and_weak_password_rejected(app, client):
     response = client.post(
         "/register/recipient",
-        data=recipient_form(email="not-an-email", password="weak", confirm_password="weak"),
+        data=recipient_form(
+            email="not-an-email", password="weak", confirm_password="weak"
+        ),
     )
     assert response.status_code == 400
     assert b"valid email" in response.data
@@ -274,12 +276,36 @@ def test_reset_unavailable_when_no_mail_and_console_disabled(app, client):
         app.config["ALLOW_CONSOLE_MAIL"] = True
 
 
-def test_dev_outbox_is_development_only(app, client):
+def test_dev_outbox_is_development_admin_only(app, client):
     user_id = create_user(app, "recipient")
     request_reset(app, client, get_email(app, user_id))
-    assert client.get("/dev/outbox").status_code == 200
+    assert client.get("/dev/outbox").status_code == 404
+    admin_client = logged_in_client(app, create_user(app, "admin"))
+    assert admin_client.get("/dev/outbox").status_code == 200
+    assert b"Reset your HemoLink password" in admin_client.get("/dev/outbox").data
     app.config["ALLOW_CONSOLE_MAIL"] = False
     try:
-        assert client.get("/dev/outbox").status_code == 404
+        assert admin_client.get("/dev/outbox").status_code == 404
     finally:
         app.config["ALLOW_CONSOLE_MAIL"] = True
+
+
+def test_changing_password_invalidates_outstanding_reset_tokens(app):
+    user_id = create_user(app, "recipient")
+    email = get_email(app, user_id)
+    client = app.test_client()
+    assert request_reset(app, client, email).status_code == 302
+    token = extract_token(app.extensions["mail_outbox"][0]["body"])
+    account = logged_in_client(app, user_id)
+    assert (
+        account.post(
+            "/account/password",
+            data={
+                "current_password": PASSWORD,
+                "new_password": "Changed9pass",
+                "confirm_password": "Changed9pass",
+            },
+        ).status_code
+        == 302
+    )
+    assert client.get("/reset-password/%s" % token).status_code == 400

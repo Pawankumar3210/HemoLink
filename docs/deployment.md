@@ -68,9 +68,8 @@ Allow connections from the internet or from GitHub Actions runners and Render
 | `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | your SMTP provider (optional but needed for password reset) |
 | `WEB_CONCURRENCY` | `2` (use `1` on a 512 MB instance if memory is tight) |
 
-   Render sets `PORT` automatically and, to my knowledge, `RENDER_GIT_COMMIT` (confirm in
-   Render's environment-variable documentation; if it is absent the smoke test simply skips
-   the release check). Do **not** set
+   Render sets `PORT` automatically and exposes `RENDER_GIT_COMMIT` as a default environment
+   variable (if it is absent, the smoke test simply skips the release check). Do **not** set
    `RUN_MIGRATIONS` or `ALLOW_DEMO_SEED` in production.
 6. Copy the service's **Deploy Hook** URL (Settings → Deploy Hook). Treat it as a secret.
 

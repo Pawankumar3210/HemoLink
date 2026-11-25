@@ -83,8 +83,7 @@ def create_contact_request(recipient, profile_id, cleaned):
     notify(
         profile.user_id,
         "New contact request",
-        "%s would like to contact you about a blood donation."
-        % recipient.full_name,
+        "%s would like to contact you about a blood donation." % recipient.full_name,
         related_type="contact_request",
         related_id=contact.id,
     )

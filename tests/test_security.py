@@ -53,7 +53,9 @@ def test_csrf_protects_state_changing_actions_when_logged_in(csrf_app):
     assert login.status_code == 302
     assert client.post("/logout").status_code == 400
     assert client.post("/notifications/read-all").status_code == 400
-    assert client.post("/account/delete", data={"password": PASSWORD}).status_code == 400
+    assert (
+        client.post("/account/delete", data={"password": PASSWORD}).status_code == 400
+    )
 
 
 def test_security_headers_present(client):
@@ -104,7 +106,9 @@ def test_login_rate_limited_per_email(limited_app):
 def test_registration_rate_limited(limited_app):
     client = limited_app.test_client()
     for i in range(10):
-        response = client.post("/register/recipient", data={"email": "x%d@example.com" % i})
+        response = client.post(
+            "/register/recipient", data={"email": "x%d@example.com" % i}
+        )
         assert response.status_code == 400
     assert client.post("/register/recipient", data={}).status_code == 429
 
@@ -112,8 +116,14 @@ def test_registration_rate_limited(limited_app):
 def test_forgot_password_rate_limited(limited_app):
     client = limited_app.test_client()
     for _ in range(5):
-        assert client.post("/forgot-password", data={"email": "a@example.com"}).status_code == 302
-    assert client.post("/forgot-password", data={"email": "a@example.com"}).status_code == 429
+        assert (
+            client.post("/forgot-password", data={"email": "a@example.com"}).status_code
+            == 302
+        )
+    assert (
+        client.post("/forgot-password", data={"email": "a@example.com"}).status_code
+        == 429
+    )
 
 
 def test_contact_request_submission_rate_limited(limited_app):
@@ -178,7 +188,9 @@ def test_sql_injection_attempts_are_inert(app):
     create_user(app, "donor", name="Normal Nia")
     client = logged_in_client(app, create_user(app, "recipient"))
     for payload in ("' OR '1'='1", "1; DROP TABLE users; --", "%' OR 1=1 --"):
-        response = client.get("/donors/search", query_string={"q": payload, "city": payload})
+        response = client.get(
+            "/donors/search", query_string={"q": payload, "city": payload}
+        )
         assert response.status_code == 200 and b"Normal Nia" not in response.data
     bad_login = app.test_client().post(
         "/login", data={"email": "' OR 1=1 --@x.com", "password": "x"}
@@ -188,7 +200,9 @@ def test_sql_injection_attempts_are_inert(app):
 
 
 def test_registration_form_is_not_prefilled_with_passwords(client):
-    response = client.post("/register/donor", data=donor_form(email="bad", password="Passw0rd!x"))
+    response = client.post(
+        "/register/donor", data=donor_form(email="bad", password="Passw0rd!x")
+    )
     assert response.status_code == 400
     assert b'value="Passw0rd!x"' not in response.data
 
@@ -201,7 +215,15 @@ def test_static_assets_served(client):
 
 
 def test_no_inline_scripts_or_styles_in_public_pages(client):
-    for path in ("/", "/about", "/how-it-works", "/sdg-3", "/privacy", "/terms", "/login"):
+    for path in (
+        "/",
+        "/about",
+        "/how-it-works",
+        "/sdg-3",
+        "/privacy",
+        "/terms",
+        "/login",
+    ):
         html = client.get(path).data.decode()
         assert " style=" not in html, path
         assert not re.search(r"<script(?![^>]*\ssrc=)", html), path

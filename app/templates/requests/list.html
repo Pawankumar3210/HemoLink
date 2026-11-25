@@ -22,7 +22,7 @@
         <td data-label="Needed by">{{ r.required_by|fmt_date }}{% if r.is_overdue %} <span class="muted">(past)</span>{% endif %}</td>
         <td data-label="Urgency">{{ badge(r.urgency) }}</td>
         <td data-label="Status">{{ badge(r.status) }}</td>
-        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('blood_requests.detail', request_id=r.id) }}">View</a></td>
+        <td data-label="Actions"><a class="btn btn-secondary btn-sm" href="{{ url_for('blood_requests.detail', request_id=r.id) }}">View</a></td>
       </tr>
       {% endfor %}
     </tbody>

@@ -25,7 +25,7 @@
         <td data-label="Role">{{ u.role|label }}</td>
         <td data-label="Status">{{ badge(u.account_status) }}</td>
         <td data-label="Joined">{{ u.created_at|fmt_date }}</td>
-        <td><a class="btn btn-secondary btn-sm" href="{{ url_for('admin.user_detail', user_id=u.id) }}">View</a></td>
+        <td data-label="Actions"><a class="btn btn-secondary btn-sm" href="{{ url_for('admin.user_detail', user_id=u.id) }}">View</a></td>
       </tr>
       {% endfor %}
     </tbody>

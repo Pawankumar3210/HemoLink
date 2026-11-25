@@ -19,7 +19,7 @@
       {{ field('city', 'City', form, errors, maxlength=80) }}
     </div>
     <div class="field-row">
-      {{ field('required_by', 'Required by', form, errors, type='date', min=today_iso) }}
+      {{ field('required_by', 'Required by', form, errors, type='date', min=none if editing else today_iso, hint='Choose today or a future date.') }}
       {{ select_field('urgency', 'Urgency', URGENCY_OPTIONS, urgency_form, errors, placeholder='Select urgency', hint='You choose this yourself. HemoLink does not assess medical urgency.') }}
     </div>
     {{ textarea_field('notes', 'Additional notes', form, errors, required=false, hint='For example, ward or visiting hours. Up to 500 characters.') }}

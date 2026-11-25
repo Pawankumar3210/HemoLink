@@ -110,6 +110,14 @@ def update_account(user, cleaned):
 def change_password(user, current_password, new_password):
     if not user.check_password(current_password):
         raise ServiceError("Your current password is incorrect.", "current_password")
+    now = utcnow()
+    db.session.execute(
+        update(PasswordResetToken)
+        .where(
+            PasswordResetToken.user_id == user.id, PasswordResetToken.used_at.is_(None)
+        )
+        .values(used_at=now)
+    )
     user.set_password(new_password)
     audit.record("user.password_change", "user", user.id, actor=user)
     db.session.commit()
@@ -192,4 +200,3 @@ def create_admin(full_name, email, phone, password):
     audit.record("admin.create", "user", user.id, "created via CLI", actor=user)
     db.session.commit()
     return user
-

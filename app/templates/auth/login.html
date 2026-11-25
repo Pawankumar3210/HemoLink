@@ -1,5 +1,5 @@
 {% extends "layouts/auth.html" %}
-{% from "partials/_macros.html" import field, csrf, form_alert %}
+{% from "partials/_macros.html" import field, csrf %}
 {% block title %}Log in · HemoLink{% endblock %}
 {% block auth_content %}
 <h1>Welcome back</h1>
@@ -7,7 +7,6 @@
 <form method="post" class="form" data-loading-form>
   {{ csrf() }}
   <input type="hidden" name="next" value="{{ next_url }}">
-  {{ form_alert(errors) }}
   {{ field('email', 'Email address', form, errors, type='email', autocomplete='email', autofocus=true) }}
   {{ field('password', 'Password', form, errors, type='password', autocomplete='current-password') }}
   <label class="check show-password"><input type="checkbox" data-toggle-password="f-password"><span>Show password</span></label>

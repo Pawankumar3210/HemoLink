@@ -127,7 +127,7 @@
 {%- endmacro %}
 
 {% macro blood_badge(group) -%}
-<span class="blood-badge" title="Blood group {{ group }}">{{ group }}</span>
+<span class="blood-badge" title="Blood group {{ group }}" aria-label="Blood group {{ group }}">{{ group }}</span>
 {%- endmacro %}
 
 {% macro post_button(action, text, css='btn btn-secondary', confirm=none, fields=none) -%}

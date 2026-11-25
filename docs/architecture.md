@@ -9,7 +9,8 @@ test and explain.
 ```mermaid
 flowchart LR
     User([User]) --> Browser[Browser<br/>HTML + CSS + vanilla JS]
-    Browser -- HTTPS --> Flask[Flask application<br/>blueprints, Jinja templates]
+    Browser -- HTTPS --> Host[Hosting platform / TLS termination]
+    Host --> Flask[Flask application<br/>blueprints, Jinja templates]
     Flask --> Services[Services<br/>business rules + validation]
     Services --> ORM[SQLAlchemy models]
     ORM --> DB[(MySQL 8)]
@@ -80,7 +81,7 @@ The app factory is `app.create_app(config_name, overrides)`.
 | Sessions | HttpOnly, SameSite=Lax, Secure in production, 8-hour lifetime, Flask-Login "strong" protection |
 | CSRF | Flask-WTF `CSRFProtect` on every POST (logout included) |
 | Injection | ORM and bound parameters only; LIKE wildcards escaped; strict allow-lists |
-| XSS | Jinja autoescape; no `safe` filter on user data; CSP `script-src 'self'; style-src 'self'` with no inline code |
+| XSS | Jinja autoescape; no `safe` filter on user data; CSP `script-src 'self'; style-src 'self' https://fonts.googleapis.com` with no inline code |
 | Headers | CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS over HTTPS, `no-store` for signed-in pages |
 | Rate limits | Login (per IP and per email), registration, password reset, contact requests, password change, account deletion |
 | Reset tokens | 32 random bytes, only the SHA-256 hash is stored, 30-minute expiry, single use, older tokens invalidated |

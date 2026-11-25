@@ -8,6 +8,9 @@ MySQL 8.0.16+).
 
 ## Entity relationship diagram
 
+Core columns are shown below; `created_at` / `updated_at` audit timestamps are omitted from
+some entities for readability but are present in the migration and models.
+
 ```mermaid
 erDiagram
     USERS ||--o| DONOR_PROFILES : "has (donors only)"

@@ -91,9 +91,10 @@ def test_donor_accepts_and_recipient_sees_phone(app):
         n.title == "Contact request accepted" for n in notifications_for(app, recipient)
     )
     # the donor also sees the recipient's number once they have accepted
-    assert get_phone(app, recipient).encode() in donor_client.get(
-        "/contact/%d" % contact_id
-    ).data
+    assert (
+        get_phone(app, recipient).encode()
+        in donor_client.get("/contact/%d" % contact_id).data
+    )
 
 
 def test_donor_declines_and_details_stay_hidden(app):
@@ -126,7 +127,9 @@ def test_request_cannot_be_accepted_twice_or_after_decline(app):
     assert second.status == "accepted"
     assert second.donor_consent_at == first.donor_consent_at
     accepted_notices = [
-        n for n in notifications_for(app, recipient) if n.title == "Contact request accepted"
+        n
+        for n in notifications_for(app, recipient)
+        if n.title == "Contact request accepted"
     ]
     assert len(accepted_notices) == 1
 
@@ -199,14 +202,24 @@ def test_cannot_link_someone_elses_blood_request(app):
 def test_recently_declined_request_cannot_be_repeated_immediately(app):
     donor, recipient = setup_pair(app)
     create_contact(
-        app, donor, recipient, status="declined", responded_at=utcnow() - timedelta(days=1)
+        app,
+        donor,
+        recipient,
+        status="declined",
+        responded_at=utcnow() - timedelta(days=1),
     )
     client = logged_in_client(app, recipient)
     response = client.post("/contact/request/%d" % profile_id(app, donor), data=MESSAGE)
-    assert response.status_code == 400 and b"declined a similar request" in response.data
+    assert (
+        response.status_code == 400 and b"declined a similar request" in response.data
+    )
     old = create_user(app, "donor")
     create_contact(
-        app, old, recipient, status="declined", responded_at=utcnow() - timedelta(days=30)
+        app,
+        old,
+        recipient,
+        status="declined",
+        responded_at=utcnow() - timedelta(days=30),
     )
     ok = client.post("/contact/request/%d" % profile_id(app, old), data=MESSAGE)
     assert ok.status_code == 302
@@ -225,18 +238,21 @@ def test_revoking_consent_hides_phone_again(app):
     contact_id = only_contact(app).id
     donor_client = logged_in_client(app, donor)
     donor_client.post("/contact/%d/accept" % contact_id)
-    assert get_phone(app, donor).encode() in recipient_client.get(
-        "/contact/%d" % contact_id
-    ).data
+    assert (
+        get_phone(app, donor).encode()
+        in recipient_client.get("/contact/%d" % contact_id).data
+    )
     assert donor_client.post("/contact/%d/revoke" % contact_id).status_code == 302
     contact = fetch(app, ContactRequest, contact_id)
     assert contact.recipient_access_revoked_at is not None
-    assert get_phone(app, donor).encode() not in recipient_client.get(
-        "/contact/%d" % contact_id
-    ).data
-    assert get_phone(app, recipient).encode() not in donor_client.get(
-        "/contact/%d" % contact_id
-    ).data
+    assert (
+        get_phone(app, donor).encode()
+        not in recipient_client.get("/contact/%d" % contact_id).data
+    )
+    assert (
+        get_phone(app, recipient).encode()
+        not in donor_client.get("/contact/%d" % contact_id).data
+    )
 
 
 def test_suspended_donor_phone_is_not_disclosed(app):

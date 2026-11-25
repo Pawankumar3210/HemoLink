@@ -125,7 +125,8 @@ def test_account_update_and_password_change(app):
     user_id = create_user(app, "donor")
     client = logged_in_client(app, user_id)
     response = client.post(
-        "/account/profile", data={"full_name": "Renamed Donor", "phone": "+919000011111"}
+        "/account/profile",
+        data={"full_name": "Renamed Donor", "phone": "+919000011111"},
     )
     assert response.status_code == 302
     assert b"Renamed Donor" in client.get("/account").data

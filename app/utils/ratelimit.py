@@ -7,7 +7,7 @@ the next step for a multi-instance deployment (see docs/architecture.md).
 
 import threading
 import time
-from collections import defaultdict, deque
+from collections import deque
 from functools import wraps
 
 from flask import current_app, request
@@ -19,7 +19,7 @@ class RateLimiter:
     """Thread-safe sliding-window counter keyed by an arbitrary string."""
 
     def __init__(self):
-        self._hits = defaultdict(deque)
+        self._hits = {}
         self._lock = threading.Lock()
         self._calls = 0
 
@@ -29,18 +29,22 @@ class RateLimiter:
         with self._lock:
             self._calls += 1
             if self._calls % 1000 == 0:
-                self._sweep(now, window)
-            bucket = self._hits[key]
-            while bucket and now - bucket[0] >= window:
+                self._sweep(now)
+            stored_window, bucket = self._hits.setdefault(key, (window, deque()))
+            while bucket and now - bucket[0] >= stored_window:
                 bucket.popleft()
             if len(bucket) >= limit:
-                retry_after = max(1, int(window - (now - bucket[0])) + 1)
+                retry_after = max(1, int(stored_window - (now - bucket[0])) + 1)
                 return False, retry_after
             bucket.append(now)
             return True, 0
 
-    def _sweep(self, now, window):
-        stale = [k for k, b in self._hits.items() if not b or now - b[-1] >= window]
+    def _sweep(self, now):
+        stale = [
+            key
+            for key, (window, bucket) in self._hits.items()
+            if not bucket or now - bucket[-1] >= window
+        ]
         for key in stale:
             del self._hits[key]
 

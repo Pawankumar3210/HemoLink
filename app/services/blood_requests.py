@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from sqlalchemy import case, select
+from sqlalchemy import case, select, update
 
 from app.constants import (
     ACCOUNT_ACTIVE,
@@ -72,12 +72,27 @@ def change_status(blood_request, new_status, actor, note=None):
             ),
             status=409,
         )
-    blood_request.status = new_status
-    blood_request.status_changed_at = utcnow()
+    previous_status = blood_request.status
+    changes = {"status": new_status, "status_changed_at": utcnow()}
     if new_status == REQUEST_REJECTED:
-        blood_request.moderation_note = note
+        changes["moderation_note"] = note
     elif new_status == REQUEST_OPEN:
-        blood_request.moderation_note = None
+        changes["moderation_note"] = None
+    result = db.session.execute(
+        update(BloodRequest)
+        .where(
+            BloodRequest.id == blood_request.id, BloodRequest.status == previous_status
+        )
+        .values(**changes)
+    )
+    if result.rowcount != 1:
+        db.session.rollback()
+        raise ServiceError(
+            "This request changed while you were editing it. Please refresh.",
+            status=409,
+        )
+    for field, value in changes.items():
+        setattr(blood_request, field, value)
 
     owner_message = "Your %s request in %s is now %s." % (
         blood_request.blood_group,

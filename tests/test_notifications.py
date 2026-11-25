@@ -82,6 +82,7 @@ def test_next_redirect_must_be_local(app):
     notification_id = make_notification(app, user_id)
     client = logged_in_client(app, user_id)
     response = client.post(
-        "/notifications/%d/read" % notification_id, data={"next": "https://evil.example"}
+        "/notifications/%d/read" % notification_id,
+        data={"next": "https://evil.example"},
     )
     assert "evil.example" not in response.headers["Location"]

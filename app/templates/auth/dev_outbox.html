@@ -2,7 +2,7 @@
 {% block title %}Development outbox · HemoLink{% endblock %}
 {% block auth_content %}
 <h1>Development outbox</h1>
-<div class="alert alert-info" role="note"><p>Development only. These messages were captured instead of being emailed. This page returns 404 in production or whenever an email server is configured.</p></div>
+<div class="alert alert-info" role="note"><p>Development only, administrators only. These messages were captured instead of being emailed. This page returns 404 in production, when an email server is configured, or for non-admin users.</p></div>
 {% for message in messages %}
 <article class="outbox-item">
   <p><strong>To:</strong> {{ message.to }}</p>

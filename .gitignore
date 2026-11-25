@@ -26,6 +26,3 @@ instance/
 .vscode/
 .DS_Store
 Thumbs.db
-
-# Local Docker data
-hemolink-data/

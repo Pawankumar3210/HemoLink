@@ -136,7 +136,9 @@ def test_list_filters_by_status_and_paginates(app):
 def test_requests_list_only_shows_own(app):
     mine = create_user(app, "recipient")
     other = create_user(app, "recipient")
-    create_blood_request(app, other, hospital_name="Other Hospital", city="Chennai", state="Tamil Nadu")
+    create_blood_request(
+        app, other, hospital_name="Other Hospital", city="Chennai", state="Tamil Nadu"
+    )
     create_blood_request(app, mine, city="Mysuru")
     client = logged_in_client(app, mine)
     text = client.get("/requests/").data
@@ -146,13 +148,19 @@ def test_requests_list_only_shows_own(app):
 def test_donor_open_requests_listing_and_defaults(app):
     recipient = create_user(app, "recipient")
     create_blood_request(app, recipient, blood_group="O+", city="Bengaluru")
-    create_blood_request(app, recipient, blood_group="AB-", city="Kochi", state="Kerala")
-    create_blood_request(app, recipient, blood_group="O+", status="cancelled", city="Hidden")
+    create_blood_request(
+        app, recipient, blood_group="AB-", city="Kochi", state="Kerala"
+    )
+    create_blood_request(
+        app, recipient, blood_group="O+", status="cancelled", city="Hidden"
+    )
     donor = logged_in_client(app, create_user(app, "donor", blood_group="O+"))
     default = donor.get("/donor/blood-requests")
     assert b"Bengaluru" in default.data
     assert b"Kochi" not in default.data and b"Hidden" not in default.data
-    widened = donor.get("/donor/blood-requests", query_string={"blood_group": "", "state": ""})
+    widened = donor.get(
+        "/donor/blood-requests", query_string={"blood_group": "", "state": ""}
+    )
     assert b"Kochi" in widened.data and b"Hidden" not in widened.data
 
 

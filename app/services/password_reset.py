@@ -67,25 +67,36 @@ def request_reset(email):
 
 
 def get_valid_token(token):
-    row = db.session.scalar(
+    return db.session.scalar(
         select(PasswordResetToken).where(
-            PasswordResetToken.token_hash == hash_token(token or "")
+            PasswordResetToken.token_hash == hash_token(token or ""),
+            PasswordResetToken.used_at.is_(None),
+            PasswordResetToken.expires_at > utcnow(),
         )
     )
-    if row is None or not row.is_usable:
-        return None
-    return row
 
 
 def reset_password(token, new_password):
+    """Consume a token atomically, then set the new password in the same transaction."""
+    now = utcnow()
     row = get_valid_token(token)
     if row is None:
         raise ServiceError("This reset link is invalid or has expired.")
     user = row.user
     if user.account_status != ACCOUNT_ACTIVE:
         raise ServiceError("This reset link is invalid or has expired.")
-    user.set_password(new_password)
-    now = utcnow()
+    consumed = db.session.execute(
+        update(PasswordResetToken)
+        .where(
+            PasswordResetToken.id == row.id,
+            PasswordResetToken.used_at.is_(None),
+            PasswordResetToken.expires_at > now,
+        )
+        .values(used_at=now)
+    )
+    if consumed.rowcount != 1:
+        db.session.rollback()
+        raise ServiceError("This reset link has already been used.")
     db.session.execute(
         update(PasswordResetToken)
         .where(
@@ -93,6 +104,7 @@ def reset_password(token, new_password):
         )
         .values(used_at=now)
     )
+    user.set_password(new_password)
     audit.record("user.password_reset", "user", user.id, actor=user)
     db.session.commit()
     return user

@@ -47,9 +47,7 @@ class DonorProfile(db.Model):
         db.Boolean, nullable=False, default=False, server_default=db.false()
     )
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, default=utcnow, onupdate=utcnow)
 
     user = db.relationship("User", back_populates="donor_profile")
 

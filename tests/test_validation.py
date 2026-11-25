@@ -153,17 +153,25 @@ def test_clean_text_removes_control_characters_and_collapses_space():
 
 def test_registration_requires_terms_and_donor_fields():
     _, errors = v.validate_registration({}, "donor")
-    assert {"full_name", "email", "phone", "password", "blood_group", "accept_terms"} <= set(
-        errors
-    )
+    assert {
+        "full_name",
+        "email",
+        "phone",
+        "password",
+        "blood_group",
+        "accept_terms",
+    } <= set(errors)
     _, errors = v.validate_registration({}, "recipient")
     assert "blood_group" not in errors
 
 
 def test_password_change_rules():
     _, errors = v.validate_password_change(
-        {"current_password": "Old1password", "new_password": "Old1password",
-         "confirm_password": "Old1password"}
+        {
+            "current_password": "Old1password",
+            "new_password": "Old1password",
+            "confirm_password": "Old1password",
+        }
     )
     assert "new_password" in errors
     _, errors = v.validate_password_change(

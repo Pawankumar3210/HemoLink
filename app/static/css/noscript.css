@@ -1,0 +1,8 @@
+/* Navigation fallback for browsers with JavaScript disabled. */
+@media (max-width: 860px) {
+  .nav-toggle { display: none; }
+  .site-nav { display: flex; position: static; flex-direction: row; align-items: center; margin-left: 2rem; padding: 0; box-shadow: none; }
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; width: auto; max-width: none; height: auto; transform: none; box-shadow: none; }
+  .app-topbar { display: none; }
+}
