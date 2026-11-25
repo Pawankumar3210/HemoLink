@@ -97,7 +97,7 @@ def authenticate(email, password):
     return user, "ok"
 
 
-def demo_login(email, password, demo_password):
+def demo_login(email, password, demo_password, role=None):
     """Create or return a demo user for frictionless demo deployments."""
     if not email or password != demo_password:
         check_password_hash(_DUMMY_HASH, password or "")
@@ -114,8 +114,12 @@ def demo_login(email, password, demo_password):
         " ".join(part.capitalize() for part in local.split() if part)[:100]
         or "Demo User"
     )
-    is_donor = "donor" in email.lower() or "admin" not in email.lower()
-    role = ROLE_DONOR if is_donor else ROLE_RECIPIENT
+    if role not in (ROLE_DONOR, ROLE_RECIPIENT):
+        role = (
+            ROLE_DONOR
+            if "donor" in email.lower() or "admin" not in email.lower()
+            else ROLE_RECIPIENT
+        )
     user = User(
         full_name=name,
         email=email.lower(),

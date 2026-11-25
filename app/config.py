@@ -3,6 +3,7 @@
 import os
 import secrets
 from datetime import timedelta
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -118,11 +119,13 @@ class Config:
             db_url = os.environ.get("DATABASE_URL") or os.environ.get(
                 "DEMO_DATABASE_URL"
             )
-            if not db_url and os.environ.get("VERCEL"):
-                db_url = "sqlite:////tmp/hemolink-demo.db"
-            app.config["SQLALCHEMY_DATABASE_URI"] = normalize_database_url(
-                db_url or "sqlite:///instance/hemolink-demo.db"
-            )
+            if not db_url:
+                if os.environ.get("VERCEL") or os.environ.get("SERVERLESS"):
+                    db_url = "sqlite:////tmp/hemolink-demo.db"
+                else:
+                    Path("instance").mkdir(parents=True, exist_ok=True)
+                    db_url = "sqlite:///instance/hemolink-demo.db"
+            app.config["SQLALCHEMY_DATABASE_URI"] = normalize_database_url(db_url)
             app.config["SECRET_KEY"] = app.config.get(
                 "SECRET_KEY"
             ) or secrets.token_hex(32)

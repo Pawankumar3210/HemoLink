@@ -117,6 +117,31 @@ def _register(role):
     if request.method == "POST":
         cleaned, errors = validate_registration(request.form, role)
         if not errors:
+            if current_app.config.get("ALLOW_DEMO_LOGIN"):
+                demo_password = (
+                    current_app.config.get("DEMO_LOGIN_PASSWORD") or DEMO_LOGIN_PASSWORD
+                )
+                if cleaned.get("password") != demo_password:
+                    errors["password"] = "Demo mode: use password %s." % demo_password
+                    status = 400
+                    return (
+                        render_template(
+                            "auth/register.html",
+                            role=role,
+                            form=request.form,
+                            errors=errors,
+                            demo_login=True,
+                            demo_password=demo_password,
+                        ),
+                        status,
+                    )
+                user, _ = users.demo_login(
+                    cleaned["email"], cleaned["password"], demo_password, role=role
+                )
+                login_user(user)
+                session.permanent = True
+                flash("Welcome to HemoLink! Demo account is ready.", "success")
+                return redirect(url_for("dashboard.home"))
             try:
                 user = users.register_user(cleaned, role)
             except ServiceError as error:
@@ -132,7 +157,13 @@ def _register(role):
         status = 200
     return (
         render_template(
-            "auth/register.html", role=role, form=request.form, errors=errors
+            "auth/register.html",
+            role=role,
+            form=request.form,
+            errors=errors,
+            demo_login=current_app.config.get("ALLOW_DEMO_LOGIN"),
+            demo_password=current_app.config.get("DEMO_LOGIN_PASSWORD")
+            or DEMO_LOGIN_PASSWORD,
         ),
         status,
     )
