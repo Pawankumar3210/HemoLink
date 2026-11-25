@@ -124,6 +124,10 @@ class Config:
                     Path("instance").mkdir(parents=True, exist_ok=True)
                     db_url = "sqlite:///instance/hemolink-demo.db"
             app.config["SQLALCHEMY_DATABASE_URI"] = normalize_database_url(db_url)
+            options = dict(app.config.get("SQLALCHEMY_ENGINE_OPTIONS") or {})
+            if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+                options.pop("connect_args", None)
+            app.config["SQLALCHEMY_ENGINE_OPTIONS"] = options
             app.config["SECRET_KEY"] = app.config.get(
                 "SECRET_KEY"
             ) or secrets.token_hex(32)
