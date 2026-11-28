@@ -99,8 +99,11 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     flash("You have been signed out.", "success")
-    return redirect(url_for("main.index"))
+    response = redirect(url_for("auth.login"))
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @bp.route("/register")

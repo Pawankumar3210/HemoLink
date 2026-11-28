@@ -4,7 +4,7 @@
 {% block shell %}
 <main id="main" class="auth-page">
   <div class="auth-card reveal is-visible">
-    <a class="auth-back" href="{{ request.referrer if request.referrer and request.host in request.referrer else url_for('main.index') }}">{{ icon('arrow-left', 16) }} Back</a>
+    <a class="auth-back" href="{{ url_for('main.index') }}">{{ icon('arrow-left', 16) }} Back to home</a>
     <div class="auth-card-head">
       <a class="auth-brand" href="{{ url_for('main.index') }}" aria-label="HemoLink home">{{ logo(36) }}</a>
     </div>

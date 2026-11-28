@@ -29,6 +29,8 @@ def register_hooks(app):
                     user_id = current_user.get_id()
             except Exception:  # noqa: BLE001 - never fail a response over logging
                 pass
+        if request.blueprint == "auth":
+            private = True
         apply_security_headers(
             response, secure_transport=request.is_secure, private=private
         )
