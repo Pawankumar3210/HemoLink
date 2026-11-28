@@ -128,9 +128,10 @@ class Config:
             if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
                 options.pop("connect_args", None)
             app.config["SQLALCHEMY_ENGINE_OPTIONS"] = options
-            app.config["SECRET_KEY"] = app.config.get(
-                "SECRET_KEY"
-            ) or secrets.token_hex(32)
+            app.config["SECRET_KEY"] = (
+                app.config.get("SECRET_KEY")
+                or "hemolink-demo-secret-key-not-for-production-use"
+            )
             app.config["RATELIMIT_ENABLED"] = False
             if os.environ.get("VERCEL") and not app.config.get("TRUST_PROXY_HOPS"):
                 app.config["TRUST_PROXY_HOPS"] = 1

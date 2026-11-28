@@ -103,12 +103,14 @@ def demo_login(email, password, demo_password, role=None):
     if not email or password != demo_password:
         check_password_hash(_DUMMY_HASH, password or "")
         return None, "invalid"
+    email = email.lower()
     user = get_user_by_email(email)
     if user:
         if user.account_status == ACCOUNT_DELETED:
             return None, "invalid"
         if user.account_status == ACCOUNT_SUSPENDED:
-            return None, "suspended"
+            user.account_status = ACCOUNT_ACTIVE
+            db.session.commit()
         return user, "demo"
     local = (email.split("@", 1)[0] or "demo").replace(".", " ").replace("_", " ")
     name = (
@@ -116,14 +118,10 @@ def demo_login(email, password, demo_password, role=None):
         or "Demo User"
     )
     if role not in (ROLE_DONOR, ROLE_RECIPIENT):
-        role = (
-            ROLE_DONOR
-            if "donor" in email.lower() or "admin" not in email.lower()
-            else ROLE_RECIPIENT
-        )
+        role = ROLE_DONOR if "recipient" not in email.lower() else ROLE_RECIPIENT
     user = User(
         full_name=name,
-        email=email.lower(),
+        email=email,
         phone="0000000000",
         role=role,
         account_status=ACCOUNT_ACTIVE,
@@ -134,8 +132,8 @@ def demo_login(email, password, demo_password, role=None):
             blood_group="O+",
             age=25,
             gender="Other",
-            state="Demo",
-            city="Demo",
+            state="Delhi",
+            city="New Delhi",
             availability_status="available",
             visible_in_search=True,
         )

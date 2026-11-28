@@ -1,5 +1,6 @@
 """User account model."""
 
+from flask import current_app, session
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -85,4 +86,17 @@ def load_user(user_id):
         return None
     if user is None or user.account_status != ACCOUNT_ACTIVE:
         return None
+    if current_app.config.get("ALLOW_DEMO_LOGIN"):
+        # Demo DBs on serverless storage can be cold or reset; recover by
+        # rebuilding the demo account tied to the active session.
+        demo_email = session.get("demo_email")
+        if demo_email and user.email != demo_email:
+            from app.services import users
+
+            recovered, _ = users.demo_login(
+                demo_email,
+                current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234",
+                current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234",
+            )
+            return recovered or user
     return user
