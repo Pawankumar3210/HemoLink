@@ -104,7 +104,7 @@ def logout():
     logout_user()
     session.clear()
     flash("You have been signed out.", "success")
-    response = redirect(url_for("auth.login"))
+    response = redirect(url_for("main.index"))
     response.headers["Cache-Control"] = "no-store"
     return response
 

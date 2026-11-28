@@ -151,7 +151,7 @@ def test_logout_requires_post_and_ends_session(app):
     assert client.get("/logout").status_code == 405
     response = client.post("/logout")
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/login")
+    assert response.headers["Location"].endswith("/")
     assert response.headers["Cache-Control"] == "no-store"
     response = client.get("/dashboard/recipient")
     assert response.status_code == 302 and "/login" in response.headers["Location"]
