@@ -70,6 +70,7 @@ def login():
                 session.permanent = True
                 if current_app.config.get("ALLOW_DEMO_LOGIN"):
                     session["demo_email"] = user.email
+                    session["demo_role"] = user.role
                 if demo_state != "demo":
                     users.record_login(user)
                 target = request.args.get("next") or request.form.get("next")
@@ -146,6 +147,7 @@ def _register(role):
                 login_user(user)
                 session.permanent = True
                 session["demo_email"] = user.email
+                session["demo_role"] = user.role
                 flash("Welcome to HemoLink! Demo account is ready.", "success")
                 return redirect(url_for("dashboard.home"))
             try:

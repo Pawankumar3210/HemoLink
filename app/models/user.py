@@ -92,6 +92,7 @@ def load_user(user_id):
     if current_app.config.get("ALLOW_DEMO_LOGIN"):
         demo_email = session.get("demo_email")
         demo_password = current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234"
+        demo_role = session.get("demo_role")
         if demo_email and (user is None or user.email != demo_email):
             from app.services import users
 
@@ -99,7 +100,9 @@ def load_user(user_id):
                 db.create_all()
             except Exception:  # noqa: BLE001
                 db.session.rollback()
-            recovered, _ = users.demo_login(demo_email, demo_password, demo_password)
+            recovered, _ = users.demo_login(
+                demo_email, demo_password, demo_password, role=demo_role
+            )
             if recovered:
                 session["_user_id"] = recovered.get_id()
                 session.modified = True
