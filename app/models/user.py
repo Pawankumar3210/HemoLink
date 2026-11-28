@@ -81,22 +81,31 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     """Reload the user for each request; suspended/deleted users are signed out."""
     try:
-        user = db.session.get(User, int(user_id))
+        uid = int(user_id)
     except (TypeError, ValueError):
         return None
-    if user is None or user.account_status != ACCOUNT_ACTIVE:
-        return None
+    try:
+        user = db.session.get(User, uid)
+    except Exception:  # noqa: BLE001 - demo DB may be cold/reset on serverless
+        db.session.rollback()
+        user = None
     if current_app.config.get("ALLOW_DEMO_LOGIN"):
-        # Demo DBs on serverless storage can be cold or reset; recover by
-        # rebuilding the demo account tied to the active session.
         demo_email = session.get("demo_email")
-        if demo_email and user.email != demo_email:
+        demo_password = current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234"
+        if user is None and demo_email:
             from app.services import users
 
-            recovered, _ = users.demo_login(
-                demo_email,
-                current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234",
-                current_app.config.get("DEMO_LOGIN_PASSWORD") or "demo1234",
-            )
-            return recovered or user
+            recovered, _ = users.demo_login(demo_email, demo_password, demo_password)
+            if recovered:
+                session["_user_id"] = recovered.get_id()
+                return recovered
+        if user is not None and demo_email and user.email != demo_email:
+            from app.services import users
+
+            recovered, _ = users.demo_login(demo_email, demo_password, demo_password)
+            if recovered:
+                session["_user_id"] = recovered.get_id()
+                return recovered
+    if user is None or user.account_status != ACCOUNT_ACTIVE:
+        return None
     return user
