@@ -9,10 +9,13 @@
       <div class="cluster">
         {% if current_user.is_authenticated and current_user.role == 'donor' %}
         <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard.home') }}">Go to your dashboard</a>
-        <a class="btn btn-secondary btn-lg" href="{{ url_for('donors.profile') }}">Manage your donor profile</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('donors.open_requests') }}">View blood requests</a>
         {% elif current_user.is_authenticated and current_user.role == 'admin' %}
         <a class="btn btn-primary btn-lg" href="{{ url_for('admin.index') }}">Open admin console</a>
         <a class="btn btn-secondary btn-lg" href="{{ url_for('main.about') }}">About HemoLink</a>
+        {% elif current_user.is_authenticated %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard.home') }}">Go to your dashboard</a>
+        <a class="btn btn-secondary btn-lg" href="{{ url_for('donors.search') }}">Find Blood Donors</a>
         {% else %}
         <a class="btn btn-primary btn-lg" href="{{ url_for('donors.search') }}">Find Blood Donors</a>
         <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.register_donor') }}">Become a Donor</a>
@@ -79,10 +82,17 @@
     <ul class="group-grid">
       {% for group in BLOOD_GROUPS %}
       <li>
+        {% if current_user.is_authenticated and current_user.role == 'donor' %}
+        <a class="group-card" href="{{ url_for('donors.open_requests', blood_group=group) }}">
+          <span class="group-name">{{ group }}</span>
+          <span class="group-cta">View {{ group }} requests</span>
+        </a>
+        {% else %}
         <a class="group-card" href="{{ url_for('donors.search', blood_group=group) }}">
           <span class="group-name">{{ group }}</span>
           <span class="group-cta">Find {{ group }} donors</span>
         </a>
+        {% endif %}
       </li>
       {% endfor %}
     </ul>

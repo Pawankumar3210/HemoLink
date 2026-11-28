@@ -225,7 +225,10 @@ def test_malformed_input_is_rejected_safely(app):
 def test_search_requires_recipient_role_and_login(app, client):
     assert client.get("/donors/search").status_code == 302
     donor_client = logged_in_client(app, create_user(app, "donor"))
-    assert donor_client.get("/donors/search").status_code == 403
+    response = donor_client.get("/donors/search", query_string={"blood_group": "O+"})
+    assert response.status_code == 302
+    assert "/donor/blood-requests" in response.headers["Location"]
+    assert "blood_group=O%2B" in response.headers["Location"]
 
 
 def test_unknown_or_hidden_profile_detail_is_404(app):

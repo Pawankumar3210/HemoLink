@@ -41,7 +41,12 @@ ADMIN_ONLY = [
 @pytest.mark.parametrize("path", RECIPIENT_ONLY)
 def test_donor_cannot_access_recipient_pages(app, path):
     client = logged_in_client(app, create_user(app, "donor"))
-    assert client.get(path).status_code == 403
+    response = client.get(path)
+    if path == "/donors/search":
+        assert response.status_code == 302
+        assert "/donor/blood-requests" in response.headers["Location"]
+    else:
+        assert response.status_code == 403
 
 
 @pytest.mark.parametrize("path", DONOR_ONLY)

@@ -147,8 +147,18 @@ def open_requests():
 
 
 @bp.route("/donors/search")
-@role_required(ROLE_RECIPIENT)
 def search():
+    if not current_user.is_authenticated:
+        return redirect(url_for("auth.login", next=request.full_path.rstrip("?")))
+    if current_user.role == ROLE_DONOR:
+        params = {}
+        for key in ("blood_group", "state"):
+            value = (request.args.get(key) or "").strip()
+            if value:
+                params[key] = value
+        return redirect(url_for("donors.open_requests", **params))
+    if current_user.role != ROLE_RECIPIENT:
+        abort(403)
     filters, errors = validate_search_filters(request.args)
     pagination = donors.search_donors(
         filters, page_arg(), current_app.config["SEARCH_PAGE_SIZE"]
